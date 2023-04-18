@@ -16,7 +16,14 @@ public class WebSecurityConfig {
 
     @Bean
     public UserDetailsManager userDetailsManager(DataSource dataSource) {
-        return new JdbcUserDetailsManager(dataSource);
+        JdbcUserDetailsManager jdbcUserDetailsManager = new JdbcUserDetailsManager(dataSource);
+        // define query to retrive user by username (custom table)
+        jdbcUserDetailsManager.setUsersByUsernameQuery("" +
+                "select email, password, enabled from users where email=?");
+        // define query to retrieve authorities
+        jdbcUserDetailsManager.setAuthoritiesByUsernameQuery("" +
+                "select email, authority from authorities where email=?");
+        return jdbcUserDetailsManager;
     }
 
     @Bean
@@ -31,14 +38,4 @@ public class WebSecurityConfig {
                 .logout((logout) -> logout.permitAll());
         return http.build();
     }
-
-//    @Bean
-//    public UserDetailsService userDetailsService() {
-//        UserDetails userDetails = User.withDefaultPasswordEncoder()
-//                .username("user")
-//                .password("password")
-//                .roles("USER")
-//                .build();
-//        return new InMemoryUserDetailsManager(userDetails);
-//    }
 }
