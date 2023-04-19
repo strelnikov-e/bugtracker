@@ -1,6 +1,7 @@
 package com.strelnikov.bugtracker.entity;
 
 import jakarta.persistence.*;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.Date;
 
@@ -12,16 +13,24 @@ public class Project {
     @Column
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
+
     @Column
     private String name;
+
     @Column
     private String description;
+
     @Column
     private int status;
-    @Column(name="lead_username")
-    private String leadUsername;
+
+    @Column(name="assignee_email")
+    private String assigneeEmail;
+
+    @DateTimeFormat(pattern = "dd/MM/yyyy")
     @Column(name="start_date")
     private Date startDate;
+
+    @DateTimeFormat(pattern = "dd/MM/yyyy")
     @Column(name="target_date")
     private Date targetDate;
 
@@ -33,7 +42,7 @@ public class Project {
         this.name = name;
         this.description = description;
         this.status = status;
-        this.leadUsername = leadUsername;
+        this.assigneeEmail = leadUsername;
         this.startDate = startDate;
         this.targetDate = targetDate;
     }
@@ -70,12 +79,12 @@ public class Project {
         this.status = status;
     }
 
-    public String getLeadUsername() {
-        return leadUsername;
+    public String getAssigneeEmail() {
+        return assigneeEmail;
     }
 
-    public void setLeadUsername(String leadUsername) {
-        this.leadUsername = leadUsername;
+    public void setAssigneeEmail(String assigneeEmail) {
+        this.assigneeEmail = assigneeEmail;
     }
 
     public Date getStartDate() {
@@ -101,7 +110,7 @@ public class Project {
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +
                 ", status=" + status +
-                ", leadUsername='" + leadUsername + '\'' +
+                ", leadUsername='" + assigneeEmail + '\'' +
                 ", startDate=" + startDate +
                 ", targetDate=" + targetDate +
                 '}';
