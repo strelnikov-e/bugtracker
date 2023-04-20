@@ -3,7 +3,10 @@ package com.strelnikov.bugtracker.entity;
 import jakarta.persistence.*;
 import org.springframework.format.annotation.DateTimeFormat;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 
 @Entity
 @Table(name="projects")
@@ -26,11 +29,11 @@ public class Project {
     @Column(name="assignee_email")
     private String assigneeEmail;
 
-    @DateTimeFormat(pattern = "dd/MM/yyyy")
+    @DateTimeFormat(pattern = "dd-MM-yyyy")
     @Column(name="start_date")
     private Date startDate;
 
-    @DateTimeFormat(pattern = "dd/MM/yyyy")
+    @DateTimeFormat(pattern = "dd-MM-yyyy")
     @Column(name="target_date")
     private Date targetDate;
 
@@ -91,16 +94,21 @@ public class Project {
         return startDate;
     }
 
-    public void setStartDate(Date startDate) {
-        this.startDate = startDate;
+    public void setStartDate(String startDate) throws ParseException {
+        this.startDate = parseDate(startDate);
     }
 
     public Date getTargetDate() {
         return targetDate;
     }
 
-    public void setTargetDate(Date targetDate) {
-        this.targetDate = targetDate;
+    public void setTargetDate(String targetDate) throws ParseException {
+        this.targetDate = parseDate(targetDate);
+    }
+
+    private Date parseDate(String date) throws ParseException {
+        SimpleDateFormat formatter =new SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH);
+        return  formatter.parse(date);
     }
 
     @Override
