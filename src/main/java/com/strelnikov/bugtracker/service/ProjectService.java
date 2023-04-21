@@ -8,5 +8,10 @@ import java.util.List;
 public interface ProjectService {
 
     List<Project> findAll();
-    void saveProject(Project project);
+
+    Project save(Project project);
+
+    Project findById(Long id);
+
+    void deleteById(Long projectId);
 }

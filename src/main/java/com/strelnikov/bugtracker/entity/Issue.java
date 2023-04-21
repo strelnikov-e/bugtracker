@@ -33,8 +33,9 @@ public class Issue {
 	}
 
 
+
 	public Issue(Long id, int status, String name, String description, Date startDate, Date targetDate,
-			Long projectId) {
+				 Long projectId) {
 		super();
 		this.id = id;
 		this.status = status;
@@ -114,6 +115,17 @@ public class Issue {
 	public void setProjectId(Long projectId) {
 		this.projectId = projectId;
 	}
-	
-	
+
+	@Override
+	public String toString() {
+		return "Issue{" +
+				"id=" + id +
+				", status=" + status +
+				", name='" + name + '\'' +
+				", description='" + description + '\'' +
+				", startDate=" + startDate +
+				", targetDate=" + targetDate +
+				", projectId=" + projectId +
+				'}';
+	}
 }
