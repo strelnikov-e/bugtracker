@@ -2,7 +2,11 @@ package com.strelnikov.bugtracker.service;
 
 import com.strelnikov.bugtracker.dao.UserRepository;
 import com.strelnikov.bugtracker.entity.User;
+import org.springframework.stereotype.Service;
 
+import java.util.List;
+
+@Service
 public class UserServiceImpl implements UserService {
 	
 	private UserRepository userRepository;
@@ -12,10 +16,13 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public User findByEmail(String email) {
+	public User findByUsername(String username) {
 		
-		return userRepository.getReferenceById(email);
+		return userRepository.getReferenceById(username);
 	}
-	
-	
+
+	@Override
+	public List<User> findAll() {
+		return userRepository.findAll();
+	}
 }

@@ -3,10 +3,7 @@ package com.strelnikov.bugtracker.entity;
 import jakarta.persistence.*;
 import org.springframework.format.annotation.DateTimeFormat;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
+import java.time.LocalDate;
 
 @Entity
 @Table(name="projects")
@@ -24,31 +21,43 @@ public class Project {
     private String description;
 
     @Column
-    private int status;
+    private String keyword;
 
-    @Column(name="assignee_email")
-    private String assigneeEmail;
+    @Column(name="lead_username")
+    private String leadUsername;
+
+    @Column
+    private String status;
 
     @DateTimeFormat(pattern = "dd-MM-yyyy")
     @Column(name="start_date")
-    private Date startDate;
+    private LocalDate startDate;
 
     @DateTimeFormat(pattern = "dd-MM-yyyy")
-    @Column(name="target_date")
-    private Date targetDate;
+    @Column(name="due_date")
+    private LocalDate dueDate;
+
+    @DateTimeFormat(pattern = "dd-MM-yyyy")
+    @Column(name="end_date")
+    private LocalDate endDate;
+
 
     public Project() {
 
     }
 
-    public Project(String name, String description, int status, String leadUsername, Date startDate, Date targetDate) {
+    public Project(String name, String description, String keyword, String leadUsername, String status,
+                   LocalDate startDate, LocalDate dueDate, LocalDate endDate) {
         this.name = name;
         this.description = description;
+        this.keyword = keyword;
+        this.leadUsername = leadUsername;
         this.status = status;
-        this.assigneeEmail = leadUsername;
         this.startDate = startDate;
-        this.targetDate = targetDate;
+        this.dueDate = dueDate;
+        this.endDate = endDate;
     }
+
 
     public long getId() {
         return id;
@@ -74,41 +83,52 @@ public class Project {
         this.description = description;
     }
 
-    public int getStatus() {
+    public String getKeyword() {
+        return keyword;
+    }
+
+    public void setKeyword(String keyword) {
+        this.keyword = keyword;
+    }
+
+    public String getLeadUsername() {
+        return leadUsername;
+    }
+
+    public void setLeadUsername(String leadUsername) {
+        this.leadUsername = leadUsername;
+    }
+
+    public String getStatus() {
         return status;
     }
 
-    public void setStatus(int status) {
+    public void setStatus(String status) {
         this.status = status;
     }
 
-    public String getAssigneeEmail() {
-        return assigneeEmail;
-    }
-
-    public void setAssigneeEmail(String assigneeEmail) {
-        this.assigneeEmail = assigneeEmail;
-    }
-
-    public Date getStartDate() {
+    public LocalDate getStartDate() {
         return startDate;
     }
 
-    public void setStartDate(String startDate) throws ParseException {
-        this.startDate = parseDate(startDate);
+    public void setStartDate(LocalDate startDate) {
+        this.startDate = startDate;
     }
 
-    public Date getTargetDate() {
-        return targetDate;
+    public LocalDate getDueDate() {
+        return dueDate;
     }
 
-    public void setTargetDate(String targetDate) throws ParseException {
-        this.targetDate = parseDate(targetDate);
+    public void setDueDate(LocalDate dueDate) {
+        this.dueDate = dueDate;
     }
 
-    private Date parseDate(String date) throws ParseException {
-        SimpleDateFormat formatter =new SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH);
-        return  formatter.parse(date);
+    public LocalDate getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(LocalDate endDate) {
+        this.endDate = endDate;
     }
 
     @Override
@@ -117,10 +137,13 @@ public class Project {
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +
-                ", status=" + status +
-                ", leadUsername='" + assigneeEmail + '\'' +
+                ", keyword='" + keyword + '\'' +
+                ", leadUsername='" + leadUsername + '\'' +
+                ", status='" + status + '\'' +
                 ", startDate=" + startDate +
-                ", targetDate=" + targetDate +
+                ", dueDate=" + dueDate +
+                ", endDate=" + endDate +
                 '}';
     }
 }
+

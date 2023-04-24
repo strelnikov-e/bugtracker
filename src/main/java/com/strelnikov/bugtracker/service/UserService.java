@@ -2,8 +2,11 @@ package com.strelnikov.bugtracker.service;
 
 import com.strelnikov.bugtracker.entity.User;
 
+import java.util.List;
+
 public interface UserService {
 	
-	User findByEmail(String email);
+	User findByUsername(String username);
 
+    List<User> findAll();
 }

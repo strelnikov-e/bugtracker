@@ -1,15 +1,14 @@
 package com.strelnikov.bugtracker.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name="users")
 public class User {
 	
 	@Id
+	private String username;
+
 	private String email;
 	
 	private String password;
@@ -29,14 +28,22 @@ public class User {
 		
 	}
 	
-	public User(String email, String password, boolean enabled, String firstName, String lastName, String companyName) {
-		super();
+	public User(String username, String email, String password, boolean enabled, String firstName, String lastName, String companyName) {
+		this.username = username;
 		this.email = email;
 		this.password = password;
 		this.enabled = enabled;
 		this.firstName = firstName;
 		this.lastName = lastName;
 		this.companyName = companyName;
+	}
+
+	public String getUsername() {
+		return username;
+	}
+
+	public void setUsername(String username) {
+		this.username = username;
 	}
 
 	public String getEmail() {
