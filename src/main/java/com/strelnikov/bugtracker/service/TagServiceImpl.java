@@ -1,5 +1,6 @@
 package com.strelnikov.bugtracker.service;
 
+import com.strelnikov.bugtracker.dao.IssueRepository;
 import com.strelnikov.bugtracker.dao.TagRepository;
 import com.strelnikov.bugtracker.entity.Tag;
 import org.springframework.stereotype.Service;
@@ -10,28 +11,48 @@ import java.util.List;
 public class TagServiceImpl implements TagService {
 
     private TagRepository tagRepository;
+    private IssueRepository issueRepository;
 
-    public TagServiceImpl(TagRepository tagRepository) {
+    public TagServiceImpl(TagRepository tagRepository, IssueRepository issueRepository) {
         this.tagRepository = tagRepository;
+        this.issueRepository = issueRepository;
     }
 
     @Override
-    public Tag save(Tag tag) {
-        return tagRepository.save(tag);
+    public Tag addTag(Long issueId, Tag tagRequest) {
+        Tag tag = issueRepository.findById(issueId).map(issue -> {
+            long tagId = tagRequest.getId();
+            // tag is existed
+            if (tagId != 0L) {
+                Tag _tag = tagRepository.findById(tagId)
+                        .orElseThrow(() -> new RuntimeException("Not found Tag with id = " + tagId));
+                issue.addTag(_tag);
+                issueRepository.save(issue);
+                return _tag;
+            }
+            // add and create new Tag
+            issue.addTag(tagRepository.save(tagRequest));
+            return tagRequest;
+        }).orElseThrow(() -> new RuntimeException("Not found Tutorial with id = " + issueId));
+
+        return tag;
     }
 
     @Override
-    public void deleteByIssueId(Long issueId) {
-        tagRepository.deleteAllByIssueId(issueId);
+    public boolean existById(Long tagId) {
+        return tagRepository.existsById(tagId);
     }
 
     @Override
-    public List<Tag> findAll() {
+    public Tag findById(Long tagId) {
+        return tagRepository.findById(tagId).orElseThrow(() -> new RuntimeException("Tag not found"));
+    }
+
+    @Override
+    public List<Tag> findByName(String name) {
+        if (name != null) {
+        return tagRepository.findByNameContaining(name);
+        }
         return tagRepository.findAll();
-    }
-
-    @Override
-    public List<Tag> findByIssueId(Long issueId) {
-        return tagRepository.findByIssueId(issueId);
     }
 }

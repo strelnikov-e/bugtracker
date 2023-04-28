@@ -4,12 +4,6 @@ use `issuetracker`;
 SET FOREIGN_KEY_CHECKS = 0;
 
 DROP TABLE IF EXISTS `users`;
-DROP TABLE IF EXISTS `authorities`;
-DROP TABLE IF EXISTS `projects`;
-DROP TABLE IF EXISTS `issues`;
-DROP TABLE IF EXISTS `users-projects`;
-DROP TABLE IF EXISTS `tags`;
-DROP TABLE IF EXISTS `teams`;
 
 create table `users` (
 `username` varchar(50),
@@ -22,6 +16,7 @@ create table `users` (
 PRIMARY KEY (`username`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
+DROP TABLE IF EXISTS `authorities`;
 
 create table `authorities` (
 `username` varchar(50) NOT NULL,
@@ -30,6 +25,7 @@ UNIQUE KEY `authorities_idx_1` (`username`,`authority`),
 CONSTRAINT `authorities_ibfk_1` FOREIGN KEY (`username`) REFERENCES `users`(`username`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
+DROP TABLE IF EXISTS `projects`;
 
 create table `projects` (
 `id` bigint not null auto_increment,
@@ -45,6 +41,7 @@ PRIMARY KEY (`id`),
 CONSTRAINT `UNIQUE_key` UNIQUE(`keyword`,`lead_username`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 
+DROP TABLE IF EXISTS `users-projects`;
 
 create table `users-projects` (
 `username` varchar(50) NOT NULL,
@@ -55,6 +52,7 @@ CONSTRAINT `user_id-project` FOREIGN KEY (`username`) REFERENCES `users`(`userna
 CONSTRAINT `user-project_id` FOREIGN KEY (`project_id`) REFERENCES `projects`(`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
+DROP TABLE IF EXISTS `issues`;
 
 create table `issues` (
 `id` bigint not null auto_increment,
@@ -68,23 +66,33 @@ create table `issues` (
 `start_date` date not null,
 `due_date` date,
 `closed_date` date,
-`project_id` bigint not null,
-PRIMARY KEY (`id`),
-CONSTRAINT `FK_issue_idx` FOREIGN KEY (`project_id`) REFERENCES `projects`(`id`)
-ON DELETE NO ACTION ON UPDATE NO ACTION
+`project_id` bigint,
+PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 
+DROP TABLE IF EXISTS `tags`;
 
 create table `tags` (
-`issue_id` bigint,
-`name` varchar(50),
-UNIQUE KEY (`issue_id`, `name`),
-CONSTRAINT `FK_issues_tags` FOREIGN KEY (`issue_id`) REFERENCES `issues`(`id`)
-ON DELETE NO ACTION ON UPDATE NO ACTION
+`id` bigint NOT NULL auto_increment,
+`name` varchar(50) NOT NULL UNIQUE,
+primary key (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+DROP TABLE IF EXISTS `tags-issues`;
+DROP TABLE IF EXISTS `issues-tags`;
+
+
+CREATE TABLE `issues-tags` (
+  `tag_id` bigint NOT NULL,
+  `issue_id` bigint NOT NULL,
+  PRIMARY KEY (`tag_id`,`issue_id`),
+  CONSTRAINT `FK_issues_tags_TAG` FOREIGN KEY (`tag_id`) REFERENCES `tags` (`id`) 
+  ON DELETE NO ACTION ON UPDATE NO ACTION,
+  CONSTRAINT `FK_issues_tags_ISSUE` FOREIGN KEY (`issue_id`) REFERENCES `issue` (`id`) 
+  ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 
-SET FOREIGN_KEY_CHECKS = 1;
 
 INSERT INTO `users` (`username`,`email`,`password`, `enabled`, `first_name`,`last_name`)
 VALUES 
@@ -145,16 +153,22 @@ VALUES
         "john","susan","2023-04-22","2023-05-30",2);
         
         
-INSERT INTO `tags`
+INSERT INTO `tags` (`name`)
 VALUES   
-        (1,"database"),
-        (1,"design"),
-        (2,"database"),
-        (1,"issues"),
-        (2,"projects"),
-        (2,"design"),
-        (3,"database"),
-        (3,"design"),
-        (3,"users"),
-        (4,"UI"),
-        (4,"design");
+        ("database"),
+        ("design"),
+        ("issues"),
+        ("projects"),
+        ("users"),
+        ("UI");
+        
+INSERT INTO `issues-tags`
+VALUES   
+        (1,1),
+        (1,2),
+        (1,3),
+        (2,1),
+        (2,2),
+        (3,1);
+
+SET FOREIGN_KEY_CHECKS = 1;

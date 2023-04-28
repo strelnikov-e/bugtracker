@@ -10,5 +10,10 @@ public interface IssueRepository extends JpaRepository<Issue, Long> {
 	
 	List<Issue> findAllByProjectId(Long projectId);
 
+    List<Issue> findIssuesByTagsId(Long tagId);
+
+    List<Issue> findAllByProjectIdAndNameContaining(Long projectId, String name);
+
     Optional<Issue> findByIdAndProjectId(Long issueId, Long projectId);
+
 }

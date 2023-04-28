@@ -7,9 +7,7 @@ import java.util.List;
 
 public interface TagRepository extends JpaRepository<Tag, Long> {
 
-    List<Tag> findByIssueId(Long issueId);
+    List<Tag> findTagsByIssuesId(Long issueId);
 
-    void deleteByIssueId(Long issueId);
-
-    void deleteAllByIssueId(Long issueId);
+    List<Tag> findByNameContaining(String name);
 }

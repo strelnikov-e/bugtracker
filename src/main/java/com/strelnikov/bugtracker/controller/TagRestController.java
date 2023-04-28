@@ -1,18 +1,24 @@
 package com.strelnikov.bugtracker.controller;
 
+import com.strelnikov.bugtracker.entity.Issue;
 import com.strelnikov.bugtracker.entity.Tag;
 import com.strelnikov.bugtracker.service.IssueService;
 import com.strelnikov.bugtracker.service.TagService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Set;
+
 
 @RestController
 @RequestMapping("/api")
 public class TagRestController {
 
-    TagService tagService;
-    IssueService issueService;
+    private TagService tagService;
+    private IssueService issueService;
+    private final Logger logger = LoggerFactory.getLogger(getClass());
 
     public TagRestController(TagService tagService, IssueService issueService) {
         this.tagService = tagService;
@@ -20,41 +26,48 @@ public class TagRestController {
     }
 
     @GetMapping("/tags")
-    public List<Tag> findAll() {
-        return tagService.findAll();
+    public List<Tag> tags(@RequestBody(required = false) String name) {
+        return tagService.findByName(name);
     }
 
-    @GetMapping("/projects/{project_id}/issues/{issue_id}/tags")
-    public List<Tag> findByIssueId(@PathVariable("issue_id") Long issueId, @PathVariable("project_id") Long projectId) {
-        if (issueService.findByIdAndProjectId(issueId,projectId) == null) {
-            throw new RuntimeException("Tags for requested issue not found");
+    @GetMapping("/tags/{tagId}")
+    public Tag getById(@PathVariable Long tagId) {
+        return tagService.findById(tagId);
+    }
+
+    @GetMapping("/issues/{issueId}/tags")
+    public Set<Tag> getTagsByIssueId(@PathVariable Long issueId) {
+        Issue issue = issueService.findById(issueId);
+        if (issue == null) {
+            throw new RuntimeException("Issue not found");
         }
-        return tagService.findByIssueId(issueId);
+        return issue.getTags();
     }
 
-    @PostMapping("/projects/{project_id}/issues/{issue_id}/tags")
-    public Tag addTag(@PathVariable("issue_id") Long issueId, @PathVariable("project_id") Long projectId, @RequestBody Tag tag) {
-        tag.setIssue(issueService.findByIdAndProjectId(issueId,projectId));
-       return tagService.save(tag);
+    @GetMapping("/tags/{tagId}/issues")
+    public List<Issue> getAllIssuesByTagId(@PathVariable Long tagId) {
+        Tag tag = tagService.findById(tagId);
+        if (!tagService.existById(tagId)) {
+            throw new RuntimeException("Tag not found");
+        }
+        return issueService.findAllByTagId(tagId);
     }
 
-    @PutMapping("/projects/{project_id}/issues/{issue_id}/tags/{tag_name}")
-    public Tag updateTag(@PathVariable("tag_name") String tagName, @PathVariable("issue_id") Long issueId,
-                         @PathVariable("project_id") Long projectId, @RequestBody Tag tag) {
-        tag.setIssue(issueService.findByIdAndProjectId(issueId, projectId));
-        return tagService.save(tag);
+    @PostMapping("/issues/{issueId}/tags")
+    public Tag addTag(@PathVariable Long issueId, @RequestBody Tag tagRequest) {
+        return tagService.addTag(issueId, tagRequest);
     }
 
-    @DeleteMapping("/projects/{project_id}/issues/{issue_id}/tags/{tag_name}")
-    public String deleteTag(@PathVariable("tag_name") String tagName, @PathVariable("issue_id") Long issueId) {
-        
-        tagService.deleteByIssueId(issueId);
-        return "Tags for issue were removed.";
+    @DeleteMapping("/issues/{issueId}/tags/{tagId}")
+    public String deleteTagFromIssue(@PathVariable Long tagId, @PathVariable Long issueId) {
+        Issue issue = issueService.findById(issueId);
+        if (issue == null) {
+            throw new RuntimeException("Issue not found");
+        }
+        Tag tag = tagService.findById(tagId);
+        issue.getTags().remove(tag);
+        return "Tag removed from issue";
     }
 
-    @DeleteMapping("/projects/{project_id}/issues/{issue_id}/tags")
-    public String deleteAllTags(@PathVariable("issue_id") Long issueId) {
-        tagService.deleteByIssueId(issueId);
-        return "Tags for issue were removed.";
-    }
+
 }

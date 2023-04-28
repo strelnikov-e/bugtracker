@@ -6,11 +6,11 @@ import java.util.List;
 
 public interface TagService {
 
-    List<Tag> findAll();
+    Tag findById(Long tagId);
 
-    List<Tag> findByIssueId(Long issueId);
+    boolean existById(Long tagId);
 
-    Tag save(Tag tag);
+    Tag addTag(Long issueId, Tag tag);
 
-    void deleteByIssueId(Long issueId);
+    List<Tag> findByName(String name);
 }

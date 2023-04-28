@@ -2,21 +2,25 @@ package com.strelnikov.bugtracker.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
+
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "tags")
 public class Tag {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
     private String name;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "issue_id")
-    @OnDelete(action = OnDeleteAction.CASCADE)
+    @ManyToMany(fetch = FetchType.LAZY,
+            cascade = {CascadeType.PERSIST, CascadeType.MERGE},
+            mappedBy = "tags")
     @JsonIgnore
-    private Issue issue;
+    private Set<Issue> issues = new HashSet<>();
 
     public Tag() {
 
@@ -24,6 +28,14 @@ public class Tag {
 
     public Tag(String name) {
         this.name = name;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getName() {
@@ -34,11 +46,12 @@ public class Tag {
         this.name = name;
     }
 
-    public Issue getIssue() {
-        return issue;
+    public Set<Issue> getIssues() {
+        return issues;
     }
 
-    public void setIssue(Issue issue) {
-        this.issue = issue;
+    public void setIssues(Set<Issue> issues) {
+        this.issues = issues;
     }
+
 }

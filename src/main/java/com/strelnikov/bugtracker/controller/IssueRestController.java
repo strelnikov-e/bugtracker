@@ -1,9 +1,10 @@
 package com.strelnikov.bugtracker.controller;
 
 import com.strelnikov.bugtracker.entity.Issue;
-import com.strelnikov.bugtracker.entity.Project;
 import com.strelnikov.bugtracker.service.IssueService;
 import com.strelnikov.bugtracker.service.ProjectService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,32 +23,36 @@ public class IssueRestController {
     }
 
     @GetMapping("/projects/{projectId}/issues")
-    public List<Issue> findAll(@PathVariable Long projectId) {
-        return issueService.findAllById(projectId);
+    public ResponseEntity<List<Issue>> getAllByProjectId(@PathVariable Long projectId, @RequestBody(required = false) String name) {
+        List<Issue> issues = issueService.getAll(projectId, name);
+        if(issues.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(issues, HttpStatus.OK);
     }
 
     @GetMapping("/projects/{projectId}/issues/{issueId}")
-    public Issue findById(@PathVariable Long projectId, @PathVariable Long issueId) {
+    public ResponseEntity<Issue> findById(@PathVariable Long projectId, @PathVariable Long issueId) {
         Issue issue = issueService.findByIdAndProjectId(issueId, projectId);
-        if (issue == null) {
-            throw new RuntimeException("Issue not found. Requested issue id: " + issueId);
-        }
-        return issue;
+        return new ResponseEntity<>(issue, HttpStatus.OK);
     }
 
     @PostMapping("/projects/{projectId}/issues")
-    public Issue addIssue(@PathVariable Long projectId, @RequestBody Issue issue) {
-        Project project = projectService.findById(projectId);
-        issue.setProject(project);
-        issue.setId(0L);
-        return issueService.save(issue);
+    public ResponseEntity<Issue> createIssue(@PathVariable Long projectId, @RequestBody Issue requestIssue) {
+        requestIssue.setId(0L);
+        Issue issue = issueService.create(requestIssue, projectId);
+        return new ResponseEntity<>(issue, HttpStatus.CREATED);
     }
 
-    @PutMapping("/projects/{projectId}/issues")
-    public Issue updateIssue(@PathVariable Long projectId, @RequestBody Issue issue) {
-        issue.setProject(projectService.findById(projectId));
-        return issueService.save(issue);
+    @PutMapping("/projects/{projectId}/issues/{issueId}")
+    public ResponseEntity<Issue> updateIssue(@PathVariable Long projectId, @PathVariable Long issueId, @RequestBody Issue requestIssue) {
+        Issue issue = issueService.findByIdAndProjectId(issueId, projectId);
+        if (issue == null) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(issueService.update(issue,requestIssue), HttpStatus.OK);
     }
+
 
     @DeleteMapping("/projects/{projectId}/issues/{issueId}")
     public String deleteIssue(@PathVariable Long projectId, @PathVariable Long issueId) {

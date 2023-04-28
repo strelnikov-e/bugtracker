@@ -6,6 +6,9 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
 
 @Entity
 @Table(name="issues")
@@ -44,6 +47,11 @@ public class Issue {
 	@JsonIgnore
 	private Project project;
 
+	@ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.MERGE, CascadeType.PERSIST})
+	@JoinTable(name = "issues-tags",
+			joinColumns = { @JoinColumn(name = "issue_id") },
+			inverseJoinColumns = { @JoinColumn(name = "tag_id") })
+	private Set<Tag> tags = new HashSet<>();
 
 
 	public Issue() {
@@ -76,21 +84,20 @@ public class Issue {
 		this.closedDate = closedDate;
 	}
 
-	@Override
-	public String toString() {
-		return "Issue{" +
-				"id=" + id +
-				", name='" + name + '\'' +
-				", description='" + description + '\'' +
-				", assignee='" + assignee + '\'' +
-				", reporter='" + reporter + '\'' +
-				", status='" + status + '\'' +
-				", severity='" + severity + '\'' +
-				", reproducible=" + reproducible +
-				", startDate=" + startDate +
-				", dueDate=" + dueDate +
-				", closedDate=" + closedDate +
-				'}';
+	public void removeTag(Long tagId) {
+		Tag tag = this.tags.stream()
+				.filter(t -> Objects.equals(t.getId(), tagId))
+				.findFirst()
+				.orElse(null);
+		if (tag != null) {
+			this.tags.remove(tag);
+			tag.getIssues().remove(this);
+		}
+	}
+
+	public void addTag(Tag tag) {
+		this.tags.add(tag);
+		tag.getIssues().add(this);
 	}
 
 	public Long getId() {
@@ -187,5 +194,31 @@ public class Issue {
 
 	public void setProject(Project project) {
 		this.project = project;
+	}
+
+	public Set<Tag> getTags() {
+		return tags;
+	}
+
+	public void setTags(Set<Tag> tags) {
+		this.tags = tags;
+	}
+
+	@Override
+	public String toString() {
+		return "Issue{" +
+				"id=" + id +
+				", name='" + name + '\'' +
+				", description='" + description + '\'' +
+				", assignee='" + assignee + '\'' +
+				", reporter='" + reporter + '\'' +
+				", status='" + status + '\'' +
+				", severity='" + severity + '\'' +
+				", reproducible=" + reproducible +
+				", startDate=" + startDate +
+				", dueDate=" + dueDate +
+				", closedDate=" + closedDate +
+				", project=" + project +
+				'}';
 	}
 }

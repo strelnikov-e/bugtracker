@@ -30,7 +30,11 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests((requests) -> requests
-                .requestMatchers(HttpMethod.GET, "/api/tags").hasAnyRole("EMPLOYEE","MANAGER","ADMIN")
+                .requestMatchers(HttpMethod.GET, "/api/**").hasAnyRole("EMPLOYEE","MANAGER","ADMIN")
+                .requestMatchers(HttpMethod.GET, "/api/issues/**").hasAnyRole("EMPLOYEE","MANAGER","ADMIN")
+                .requestMatchers(HttpMethod.POST, "/api/issues/**").hasAnyRole("MANAGER","ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/api/issues/**").hasAnyRole("MANAGER","ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/issues/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.GET, "/api/projects").hasAnyRole("EMPLOYEE","MANAGER","ADMIN")
                 .requestMatchers(HttpMethod.GET, "/api/projects/**").hasAnyRole("EMPLOYEE","MANAGER","ADMIN")
                 .requestMatchers(HttpMethod.POST, "/api/projects").hasAnyRole("MANAGER","ADMIN")
@@ -39,6 +43,8 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.PUT, "/api/projects/**").hasAnyRole("MANAGER","ADMIN")
                 .requestMatchers(HttpMethod.DELETE, "/api/projects/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.GET, "/api/users").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/tags/**").hasRole("ADMIN")
+
 
         );
         http.httpBasic();
