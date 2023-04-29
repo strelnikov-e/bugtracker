@@ -12,8 +12,8 @@ import java.util.List;
 @Service
 public class TagServiceImpl implements TagService {
 
-    private TagRepository tagRepository;
-    private IssueRepository issueRepository;
+    private final TagRepository tagRepository;
+    private final IssueRepository issueRepository;
 
     public TagServiceImpl(TagRepository tagRepository, IssueRepository issueRepository) {
         this.tagRepository = tagRepository;

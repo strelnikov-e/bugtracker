@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class IssueServiceImpl implements IssueService {
@@ -25,6 +24,9 @@ public class IssueServiceImpl implements IssueService {
 
 	@Override
 	public void deleteById(Long issueId) {
+		if (!issueRepository.existsById(issueId)) {
+			throw new IssueNotFoundException(issueId);
+		}
 		issueRepository.deleteById(issueId);
 	}
 
@@ -45,16 +47,6 @@ public class IssueServiceImpl implements IssueService {
 		return issues;
 	}
 
-	// Get issue details
-	@Override
-	public Issue findByIdAndProjectId(Long issueId, Long projectId) {
-		Optional<Issue> result = issueRepository.findByIdAndProjectId(issueId, projectId);
-		if (result.isEmpty()) {
-			throw new IssueNotFoundException(issueId);
-		}
-		return result.get();
-	}
-
 	@Override
 	public Issue findById(Long issueId) {
 		return issueRepository.findById(issueId).orElseThrow(() -> new IssueNotFoundException(issueId));
@@ -66,16 +58,17 @@ public class IssueServiceImpl implements IssueService {
 	}
 
 	@Override
-	public Issue create(Issue issue, Long projectId) {
-		Issue newIssue = projectRepository.findById(projectId).map(project -> {
-					issue.setProject(project);
+	public Issue create(Issue issue) {
+		Issue newIssue = projectRepository.findById(issue.getProject().getId()).map(project -> {
 					return issueRepository.save(issue);
-				}).orElseThrow(() -> new ProjectNotFoundException(projectId));
+				}).orElseThrow(() -> new ProjectNotFoundException(issue.getProject().getId()));
 		return newIssue;
 	}
 
 	@Override
-	public Issue update(Issue issue, Issue requestIssue) {
+	public Issue update(Long issueId, Issue requestIssue) {
+		Issue issue = issueRepository.findById(issueId)
+				.orElseThrow(() -> new IssueNotFoundException(issueId));
 		issue.setTags(requestIssue.getTags());
 		issue.setAssignee(requestIssue.getAssignee());
 		issue.setDescription(requestIssue.getDescription());

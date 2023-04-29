@@ -8,15 +8,13 @@ public interface IssueService {
 
     List<Issue> getAll(Long projectId, String name);
 
-    Issue findByIdAndProjectId(Long issueId, Long projectId);
-
     Issue save(Issue issue);
 
     void deleteById(Long issueId);
 
-    Issue create(Issue issue, Long projectId);
+    Issue create(Issue issue);
 
-    Issue update(Issue issue, Issue requestIssue);
+    Issue update(Long issueId, Issue requestIssue);
 
     Issue findById(Long issueId);
 
