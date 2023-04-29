@@ -2,23 +2,43 @@ package com.strelnikov.bugtracker.controller;
 
 import com.strelnikov.bugtracker.entity.Issue;
 import com.strelnikov.bugtracker.service.IssueService;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
 @RequestMapping("/api")
 public class IssueRestController {
 
     private final IssueService issueService;
+    private final IssueModelAssembler assembler;
 
-    public IssueRestController(IssueService issueService) {
+    public IssueRestController(IssueService issueService, IssueModelAssembler assembler) {
         this.issueService = issueService;
+        this.assembler = assembler;
     }
 
     @GetMapping("/issues/{issueId}")
-    public Issue findById(@PathVariable Long issueId) {
-        return issueService.findById(issueId);
+    public EntityModel<Issue> getById(@PathVariable Long issueId) {
+        Issue issue = issueService.findById(issueId);
+        return assembler.toModel(issue) ;
     }
+
+    @GetMapping("/issues")
+    public CollectionModel<EntityModel<Issue>> all(@RequestBody(required = false) String name) {
+        List<EntityModel<Issue>> issues = issueService.findByName(name).stream()
+                .map(assembler::toModel)
+                .collect(Collectors.toList());
+        return CollectionModel.of(issues, linkTo(methodOn(IssueRestController.class).all(name)).withSelfRel());
+    }
+
 
     @PostMapping("/issues")
     @ResponseStatus(HttpStatus.CREATED)

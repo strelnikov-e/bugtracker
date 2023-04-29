@@ -16,4 +16,6 @@ public interface IssueRepository extends JpaRepository<Issue, Long> {
 
     Optional<Issue> findByIdAndProjectId(Long issueId, Long projectId);
 
+    List<Issue> findByNameContaining(String name);
+
 }

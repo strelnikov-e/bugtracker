@@ -31,6 +31,15 @@ public class IssueServiceImpl implements IssueService {
 	}
 
 	@Override
+	public List<Issue> findByName(String name) {
+		if (name == null) {
+			name = "";
+		}
+		return issueRepository.findByNameContaining(name);
+	}
+
+
+	@Override
 	public Issue save(Issue issue) {
 		return issueRepository.save(issue);
 	}

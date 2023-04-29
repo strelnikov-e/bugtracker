@@ -1,7 +1,6 @@
 package com.strelnikov.bugtracker.controller;
 
 import com.strelnikov.bugtracker.entity.Tag;
-import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
 import org.springframework.stereotype.Component;
@@ -18,8 +17,4 @@ public class TagModelAssembler implements RepresentationModelAssembler<Tag, Enti
                 linkTo(methodOn(TagRestController.class).all(tag.getName())).withRel("tags"));
     }
 
-    @Override
-    public CollectionModel<EntityModel<Tag>> toCollectionModel(Iterable<? extends Tag> entities) {
-        return RepresentationModelAssembler.super.toCollectionModel(entities);
-    }
 }

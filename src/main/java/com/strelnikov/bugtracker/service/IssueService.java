@@ -19,4 +19,6 @@ public interface IssueService {
     Issue findById(Long issueId);
 
     List<Issue> findAllByTagId(Long tagId);
+
+    List<Issue> findByName(String name);
 }
