@@ -3,6 +3,8 @@ package com.strelnikov.bugtracker.service;
 import com.strelnikov.bugtracker.dao.IssueRepository;
 import com.strelnikov.bugtracker.dao.ProjectRepository;
 import com.strelnikov.bugtracker.entity.Issue;
+import com.strelnikov.bugtracker.exception.IssueNotFoundException;
+import com.strelnikov.bugtracker.exception.ProjectNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -40,9 +42,6 @@ public class IssueServiceImpl implements IssueService {
 		} else {
 			issueRepository.findAllByProjectIdAndNameContaining(projectId, name).forEach(issues::add);
 		}
-		if (issues.isEmpty()) {
-			throw new RuntimeException("Issues not found");
-		}
 		return issues;
 	}
 
@@ -51,14 +50,14 @@ public class IssueServiceImpl implements IssueService {
 	public Issue findByIdAndProjectId(Long issueId, Long projectId) {
 		Optional<Issue> result = issueRepository.findByIdAndProjectId(issueId, projectId);
 		if (result.isEmpty()) {
-			throw new RuntimeException("Issue not found. Requested issue id: " + issueId);
+			throw new IssueNotFoundException(issueId);
 		}
 		return result.get();
 	}
 
 	@Override
 	public Issue findById(Long issueId) {
-		return issueRepository.findById(issueId).orElseThrow(() -> new RuntimeException("Issue not found"));
+		return issueRepository.findById(issueId).orElseThrow(() -> new IssueNotFoundException(issueId));
 	}
 
 	@Override
@@ -71,7 +70,7 @@ public class IssueServiceImpl implements IssueService {
 		Issue newIssue = projectRepository.findById(projectId).map(project -> {
 					issue.setProject(project);
 					return issueRepository.save(issue);
-				}).orElseThrow(() -> new RuntimeException("Project with id = " + projectId + " not found"));
+				}).orElseThrow(() -> new ProjectNotFoundException(projectId));
 		return newIssue;
 	}
 

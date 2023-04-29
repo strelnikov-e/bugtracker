@@ -1,6 +1,7 @@
 package com.strelnikov.bugtracker.controller;
 
 import com.strelnikov.bugtracker.entity.Project;
+import com.strelnikov.bugtracker.exception.ProjectNotFoundException;
 import com.strelnikov.bugtracker.service.ProjectService;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,7 +26,7 @@ public class ProjectRestController {
     public Project findById(@PathVariable Long projectId) {
         Project project = projectService.findById(projectId);
         if (project == null) {
-            throw new RuntimeException("Project not found. Requested project id: " + projectId);
+            throw new ProjectNotFoundException(projectId);
         }
         return project;
     }
@@ -44,7 +45,7 @@ public class ProjectRestController {
     @DeleteMapping("/projects/{projectId}")
     public String deleteProject(@PathVariable Long projectId) {
         if (projectService.findById(projectId) == null) {
-            throw new RuntimeException("Project not found. Requested project ID: " + projectId);
+            throw new ProjectNotFoundException(projectId);
         }
         projectService.deleteById(projectId);
         return "Deleted project with ID: " + projectId;

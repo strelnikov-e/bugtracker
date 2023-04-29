@@ -1,8 +1,8 @@
 package com.strelnikov.bugtracker.controller;
 
 import com.strelnikov.bugtracker.entity.Issue;
+import com.strelnikov.bugtracker.exception.IssueNotFoundException;
 import com.strelnikov.bugtracker.service.IssueService;
-import com.strelnikov.bugtracker.service.ProjectService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,11 +15,8 @@ public class IssueRestController {
 
     private IssueService issueService;
 
-    private ProjectService projectService;
-
-    public IssueRestController(IssueService issueService, ProjectService projectService) {
+    public IssueRestController(IssueService issueService) {
         this.issueService = issueService;
-        this.projectService = projectService;
     }
 
     @GetMapping("/projects/{projectId}/issues")
@@ -48,7 +45,7 @@ public class IssueRestController {
     public ResponseEntity<Issue> updateIssue(@PathVariable Long projectId, @PathVariable Long issueId, @RequestBody Issue requestIssue) {
         Issue issue = issueService.findByIdAndProjectId(issueId, projectId);
         if (issue == null) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            throw new IssueNotFoundException(issueId);
         }
         return new ResponseEntity<>(issueService.update(issue,requestIssue), HttpStatus.OK);
     }
@@ -57,7 +54,7 @@ public class IssueRestController {
     @DeleteMapping("/projects/{projectId}/issues/{issueId}")
     public String deleteIssue(@PathVariable Long projectId, @PathVariable Long issueId) {
         if (issueService.findByIdAndProjectId(issueId, projectId) == null) {
-            throw new RuntimeException("Issue not found. Requested issue id: " + issueId);
+            throw new IssueNotFoundException(issueId);
         }
         issueService.deleteById(issueId);
         return "Deleted issue with id " + issueId;

@@ -3,6 +3,8 @@ package com.strelnikov.bugtracker.service;
 import com.strelnikov.bugtracker.dao.IssueRepository;
 import com.strelnikov.bugtracker.dao.TagRepository;
 import com.strelnikov.bugtracker.entity.Tag;
+import com.strelnikov.bugtracker.exception.IssueNotFoundException;
+import com.strelnikov.bugtracker.exception.TagNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -25,7 +27,7 @@ public class TagServiceImpl implements TagService {
             // tag is existed
             if (tagId != 0L) {
                 Tag _tag = tagRepository.findById(tagId)
-                        .orElseThrow(() -> new RuntimeException("Not found Tag with id = " + tagId));
+                        .orElseThrow(() -> new TagNotFoundException(tagId));
                 issue.addTag(_tag);
                 issueRepository.save(issue);
                 return _tag;
@@ -33,7 +35,7 @@ public class TagServiceImpl implements TagService {
             // add and create new Tag
             issue.addTag(tagRepository.save(tagRequest));
             return tagRequest;
-        }).orElseThrow(() -> new RuntimeException("Not found Tutorial with id = " + issueId));
+        }).orElseThrow(() -> new IssueNotFoundException(issueId));
 
         return tag;
     }
@@ -45,7 +47,7 @@ public class TagServiceImpl implements TagService {
 
     @Override
     public Tag findById(Long tagId) {
-        return tagRepository.findById(tagId).orElseThrow(() -> new RuntimeException("Tag not found"));
+        return tagRepository.findById(tagId).orElseThrow(() -> new TagNotFoundException(tagId));
     }
 
     @Override

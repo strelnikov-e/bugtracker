@@ -2,6 +2,8 @@ package com.strelnikov.bugtracker.controller;
 
 import com.strelnikov.bugtracker.entity.Issue;
 import com.strelnikov.bugtracker.entity.Tag;
+import com.strelnikov.bugtracker.exception.IssueNotFoundException;
+import com.strelnikov.bugtracker.exception.TagNotFoundException;
 import com.strelnikov.bugtracker.service.IssueService;
 import com.strelnikov.bugtracker.service.TagService;
 import org.slf4j.Logger;
@@ -39,7 +41,7 @@ public class TagRestController {
     public Set<Tag> getTagsByIssueId(@PathVariable Long issueId) {
         Issue issue = issueService.findById(issueId);
         if (issue == null) {
-            throw new RuntimeException("Issue not found");
+            throw new IssueNotFoundException(issueId);
         }
         return issue.getTags();
     }
@@ -48,7 +50,7 @@ public class TagRestController {
     public List<Issue> getAllIssuesByTagId(@PathVariable Long tagId) {
         Tag tag = tagService.findById(tagId);
         if (!tagService.existById(tagId)) {
-            throw new RuntimeException("Tag not found");
+            throw new TagNotFoundException(tagId);
         }
         return issueService.findAllByTagId(tagId);
     }
@@ -62,7 +64,7 @@ public class TagRestController {
     public String deleteTagFromIssue(@PathVariable Long tagId, @PathVariable Long issueId) {
         Issue issue = issueService.findById(issueId);
         if (issue == null) {
-            throw new RuntimeException("Issue not found");
+            throw new IssueNotFoundException(issueId);
         }
         Tag tag = tagService.findById(tagId);
         issue.getTags().remove(tag);

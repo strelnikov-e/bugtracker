@@ -2,6 +2,7 @@ package com.strelnikov.bugtracker.service;
 
 import com.strelnikov.bugtracker.dao.ProjectRepository;
 import com.strelnikov.bugtracker.entity.Project;
+import com.strelnikov.bugtracker.exception.ProjectNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -29,14 +30,14 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public Project findById(Long id) {
-        Optional<Project> result = projectRepository.findById(id);
+    public Project findById(Long projectId) {
+        Optional<Project> result = projectRepository.findById(projectId);
         Project project = null;
         if (result.isPresent()) {
             project = result.get();
         }
         else {
-            throw new RuntimeException("Project not found. Requested project id: " + id);
+            throw new ProjectNotFoundException(projectId);
         }
         return project;
     }
