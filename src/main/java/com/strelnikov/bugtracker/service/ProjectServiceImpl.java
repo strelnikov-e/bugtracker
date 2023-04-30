@@ -25,8 +25,11 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public List<Project> findAll() {
-        return projectRepository.findAll();
+    public List<Project> findByName(String name) {
+        if (name == null) {
+            name = "";
+        }
+        return projectRepository.findByNameContaining(name);
     }
 
     @Override

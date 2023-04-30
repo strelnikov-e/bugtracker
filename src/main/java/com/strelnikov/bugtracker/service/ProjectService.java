@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface ProjectService {
 
-    List<Project> findAll();
+    List<Project> findByName(String name);
 
     Project save(Project project);
 
