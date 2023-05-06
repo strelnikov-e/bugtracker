@@ -1,8 +1,7 @@
 package com.strelnikov.bugtracker.entity;
 
 import jakarta.persistence.*;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
+import org.hibernate.Hibernate;
 
 import java.time.LocalDate;
 import java.util.HashSet;
@@ -19,14 +18,20 @@ public class Issue {
 
 	private String name;
 
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "project_id", updatable = false)
+	private Project project;
+
 	private String description;
 
 	private String assignee;
 
 	private String reporter;
 
+	@Column(columnDefinition = "char")
 	private String status;
 
+	@Column(columnDefinition = "char")
 	private String severity;
 
 	private boolean reproducible;
@@ -40,13 +45,8 @@ public class Issue {
 	@Column(name="closed_date")
 	private LocalDate closedDate;
 
-	@ManyToOne(fetch = FetchType.EAGER, optional = false)
-	@JoinColumn(name="project_id", nullable = false)
-	@OnDelete(action = OnDeleteAction.CASCADE)
-	private Project project;
-
 	@ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.MERGE, CascadeType.PERSIST})
-	@JoinTable(name = "issues-tags",
+	@JoinTable(name = "issues_tags",
 			joinColumns = { @JoinColumn(name = "issue_id") },
 			inverseJoinColumns = { @JoinColumn(name = "tag_id") })
 	private Set<Tag> tags = new HashSet<>();
@@ -96,6 +96,21 @@ public class Issue {
 	public void addTag(Tag tag) {
 		this.tags.add(tag);
 		tag.getIssues().add(this);
+	}
+
+	@Override
+	public int hashCode() {
+		return getClass().hashCode();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) return true;
+		if (obj == null || Hibernate.getClass(this) != Hibernate.getClass(obj)) {
+			return false;
+		}
+		Issue that = (Issue) obj;
+		return this.id != 0L && Objects.equals(this.id, that.id);
 	}
 
 	public Long getId() {

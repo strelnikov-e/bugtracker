@@ -10,6 +10,8 @@ public interface IssueService {
 
     Issue save(Issue issue);
 
+    Issue save(Issue issue, Long projectId);
+
     void deleteById(Long issueId);
 
     Issue create(Issue issue);
@@ -21,4 +23,6 @@ public interface IssueService {
     List<Issue> findAllByTagId(Long tagId);
 
     List<Issue> findByName(String name);
+
+    List<Issue> findByProjectId(Long projectId);
 }

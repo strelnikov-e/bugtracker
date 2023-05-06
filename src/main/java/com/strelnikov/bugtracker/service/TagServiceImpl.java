@@ -1,7 +1,8 @@
 package com.strelnikov.bugtracker.service;
 
-import com.strelnikov.bugtracker.dao.IssueRepository;
-import com.strelnikov.bugtracker.dao.TagRepository;
+import com.strelnikov.bugtracker.repository.IssueRepository;
+import com.strelnikov.bugtracker.repository.TagRepository;
+import com.strelnikov.bugtracker.entity.Issue;
 import com.strelnikov.bugtracker.entity.Tag;
 import com.strelnikov.bugtracker.exception.IssueNotFoundException;
 import com.strelnikov.bugtracker.exception.TagNotFoundException;
@@ -22,21 +23,21 @@ public class TagServiceImpl implements TagService {
 
     @Override
     public Tag addTag(Long issueId, Tag tagRequest) {
-        Tag tag = issueRepository.findById(issueId).map(issue -> {
-            long tagId = tagRequest.getId();
-            // tag is existed
-            if (tagId != 0L) {
-                Tag _tag = tagRepository.findById(tagId)
-                        .orElseThrow(() -> new TagNotFoundException(tagId));
-                issue.addTag(_tag);
-                issueRepository.save(issue);
-                return _tag;
+        Issue issue = issueRepository.findById(issueId).orElseThrow(() -> new IssueNotFoundException(issueId));
+        Tag tag = null;
+        if (tagRequest.getId() == null) tagRequest.setId(0L);
+        Long tagId = tagRequest.getId();
+        if (tagId != 0L) {
+            tag = tagRepository.findById(tagId).orElseThrow(() -> new TagNotFoundException(tagId));
+        }
+        else {
+            tag = tagRepository.findByName(tagRequest.getName());
+            if (tag == null) {
+                tag = tagRepository.save(tagRequest);
             }
-            // add and create new Tag
-            issue.addTag(tagRepository.save(tagRequest));
-            return tagRequest;
-        }).orElseThrow(() -> new IssueNotFoundException(issueId));
-
+        }
+        issue.addTag(tag);
+        issueRepository.save(issue);
         return tag;
     }
 

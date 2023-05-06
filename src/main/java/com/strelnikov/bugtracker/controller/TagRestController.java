@@ -9,7 +9,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -35,7 +37,7 @@ public class TagRestController {
     }
 
     @GetMapping("/tags")
-    public CollectionModel<EntityModel<Tag>> all(@RequestBody(required = false) String name) {
+    public CollectionModel<EntityModel<Tag>> all(@RequestParam(value = "name", required = false) String name) {
         List<EntityModel<Tag>> tags = tagService.findByName(name).stream()
                 .map(assembler::toModel)
                 .collect(Collectors.toList());
@@ -60,30 +62,22 @@ public class TagRestController {
         return CollectionModel.of(tags, linkTo(methodOn(TagRestController.class).getTagsByIssueId(issueId)).withSelfRel());
     }
 
-//    @GetMapping("/tags/{tagId}/issues")
-//    public CollectionModel<EntityModel<Issue>> getAllIssuesByTagId(@PathVariable Long tagId) {
-//        Tag tag = tagService.findById(tagId);
-//        if (!tagService.existById(tagId)) {
-//            throw new TagNotFoundException(tagId);
-//        }
-//        return issueService.findAllByTagId(tagId);
-//    }
-
     @PostMapping("/issues/{issueId}/tags")
     @ResponseStatus(HttpStatus.CREATED)
-    public Tag addTag(@PathVariable Long issueId, @RequestBody Tag tagRequest) {
-        return tagService.addTag(issueId, tagRequest);
+    public ResponseEntity<?> addTag(@PathVariable Long issueId, @RequestBody Tag tagRequest) {
+        EntityModel<Tag> entityModel = assembler.toModel(tagService.addTag(issueId, tagRequest));
+
+        return ResponseEntity.created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri()).body(entityModel);
     }
 
     @DeleteMapping("/issues/{issueId}/tags/{tagId}")
-    public String deleteTagFromIssue(@PathVariable Long tagId, @PathVariable Long issueId) {
+    public ResponseEntity<?> deleteTagFromIssue(@PathVariable Long tagId, @PathVariable Long issueId) {
+
         Issue issue = issueService.findById(issueId);
-        if (issue == null) {
-            throw new IssueNotFoundException(issueId);
-        }
         Tag tag = tagService.findById(tagId);
         issue.getTags().remove(tag);
-        return "Tag removed from issue";
+        issueService.save(issue);
+        return ResponseEntity.noContent().build();
     }
 
 

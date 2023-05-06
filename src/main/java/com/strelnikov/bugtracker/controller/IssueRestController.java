@@ -4,7 +4,9 @@ import com.strelnikov.bugtracker.entity.Issue;
 import com.strelnikov.bugtracker.service.IssueService;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -32,31 +34,39 @@ public class IssueRestController {
     }
 
     @GetMapping("/issues")
-    public CollectionModel<EntityModel<Issue>> all(@RequestBody(required = false) String name) {
-        List<EntityModel<Issue>> issues = issueService.findByName(name).stream()
+    public CollectionModel<EntityModel<Issue>> all(@RequestParam(value = "project",defaultValue = "0",required = false) Long projectId) {
+        if (projectId != 0L) {
+            List<EntityModel<Issue>> issues = issueService.findByProjectId(projectId).stream()
+                    .map(assembler::toModel)
+                    .collect(Collectors.toList());
+            return CollectionModel.of(issues, linkTo(methodOn(IssueRestController.class).all(projectId)).withSelfRel());
+        }
+        List<EntityModel<Issue>> issues = issueService.findByName("").stream()
                 .map(assembler::toModel)
                 .collect(Collectors.toList());
-        return CollectionModel.of(issues, linkTo(methodOn(IssueRestController.class).all(name)).withSelfRel());
+        return CollectionModel.of(issues, linkTo(methodOn(IssueRestController.class).all(0L)).withSelfRel());
     }
 
 
     @PostMapping("/issues")
     @ResponseStatus(HttpStatus.CREATED)
-    public Issue createIssue(@RequestBody Issue requestIssue) {
+    public ResponseEntity<?> createIssue(@RequestBody Issue requestIssue) {
         requestIssue.setId(0L);
-        return issueService.create(requestIssue);
+        EntityModel<Issue> entityModel = assembler.toModel(issueService.create(requestIssue));
+        return ResponseEntity.created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri()).body(entityModel);
     }
 
     @PutMapping("/issues/{issueId}")
-    public Issue updateIssue(@PathVariable Long issueId, @RequestBody Issue requestIssue) {
-        return issueService.update(issueId,requestIssue);
+    public ResponseEntity<?> updateIssue(@PathVariable Long issueId, @RequestBody Issue requestIssue) {
+        EntityModel<Issue> entityModel = assembler.toModel(issueService.update(issueId,requestIssue));
+         return ResponseEntity.created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri()).body(entityModel);
     }
 
 
     @DeleteMapping("/issues/{issueId}")
-    public String deleteIssue(@PathVariable Long issueId) {
+    public ResponseEntity<?> deleteIssue(@PathVariable Long issueId) {
         issueService.deleteById(issueId);
-        return "Deleted issue with id '" + issueId + "'";
+        return ResponseEntity.noContent().build();
     }
 
 }

@@ -1,32 +1,38 @@
 package com.strelnikov.bugtracker.entity;
 
 import jakarta.persistence.*;
+import org.hibernate.Hibernate;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Table(name="projects")
 public class Project {
 
     @Id
-    @Column
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
     @Column
     private String name;
 
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "project")
+    private List<Issue> issues = new ArrayList<>();
+
     @Column
     private String description;
 
-    @Column
+    @Column(columnDefinition = "char")
     private String keyword;
 
     @Column(name="lead_username")
     private String leadUsername;
 
-    @Column
+    @Column(columnDefinition = "char")
     private String status;
 
     @DateTimeFormat(pattern = "dd-MM-yyyy")
@@ -58,6 +64,34 @@ public class Project {
         this.endDate = endDate;
     }
 
+    public static Project newProject(String name) {
+        final var project = new Project();
+        project.name = name;
+        return project;
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || Hibernate.getClass(this) != Hibernate.getClass(obj)) {
+            return false;
+        }
+        Project that = (Project) obj;
+        return this.id != 0L && Objects.equals(this.id, that.id);
+    }
+
+    public List<Issue> getIssues() {
+        return issues;
+    }
+
+    public void setIssues(List<Issue> issues) {
+        this.issues = issues;
+    }
 
     public long getId() {
         return id;

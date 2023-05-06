@@ -1,11 +1,12 @@
 package com.strelnikov.bugtracker.service;
 
-import com.strelnikov.bugtracker.dao.IssueRepository;
-import com.strelnikov.bugtracker.dao.ProjectRepository;
+import com.strelnikov.bugtracker.repository.IssueRepository;
+import com.strelnikov.bugtracker.repository.ProjectRepository;
 import com.strelnikov.bugtracker.entity.Issue;
 import com.strelnikov.bugtracker.exception.IssueNotFoundException;
 import com.strelnikov.bugtracker.exception.ProjectNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,6 +41,14 @@ public class IssueServiceImpl implements IssueService {
 
 
 	@Override
+	@Transactional
+	public Issue save(Issue issue, Long projectId) {
+		issue.setProject(projectRepository.getReferenceById(projectId));
+		final Issue newIssue = issueRepository.save(issue);
+		return newIssue;
+	}
+
+	@Override
 	public Issue save(Issue issue) {
 		return issueRepository.save(issue);
 	}
@@ -54,6 +63,14 @@ public class IssueServiceImpl implements IssueService {
 			issueRepository.findAllByProjectIdAndNameContaining(projectId, name).forEach(issues::add);
 		}
 		return issues;
+	}
+
+	@Override
+	public List<Issue> findByProjectId(Long projectId) {
+		if (!projectRepository.existsById(projectId)) {
+			throw new ProjectNotFoundException(projectId);
+		}
+		return issueRepository.findAllByProjectId(projectId);
 	}
 
 	@Override

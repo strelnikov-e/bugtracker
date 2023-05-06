@@ -5,6 +5,8 @@ import com.strelnikov.bugtracker.exception.ProjectNotFoundException;
 import com.strelnikov.bugtracker.service.ProjectService;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.IanaLinkRelations;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -26,7 +28,7 @@ public class ProjectRestController {
     }
 
     @GetMapping("/projects")
-    public CollectionModel<EntityModel<Project>> all(@RequestBody(required = false) String name) {
+    public CollectionModel<EntityModel<Project>> all(@RequestParam(value = "name", defaultValue = "", required = false) String name) {
         List<EntityModel<Project>> projects = projectService.findByName(name).stream()
                 .map(assembler::toModel)
                 .collect(Collectors.toList());
@@ -43,23 +45,25 @@ public class ProjectRestController {
     }
 
     @PostMapping("/projects")
-    public Project addProject(@RequestBody Project project) {
+    public ResponseEntity<?> addProject(@RequestBody Project project) {
         project.setId(0L);
-        return projectService.save(project);
+        EntityModel<Project> entityModel = assembler.toModel(projectService.save(project));
+        return ResponseEntity.created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri()).body(entityModel);
     }
 
     @PutMapping("/projects")
-    public Project updateProject(@RequestBody Project project) {
-        return projectService.save(project);
+    public ResponseEntity<?> updateProject(@RequestBody Project project) {
+        EntityModel<Project> entityModel = assembler.toModel(projectService.save(project));
+        return ResponseEntity.created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri()).body(entityModel);
     }
 
     @DeleteMapping("/projects/{projectId}")
-    public String deleteProject(@PathVariable Long projectId) {
+    public ResponseEntity<?> deleteProject(@PathVariable Long projectId) {
         if (projectService.findById(projectId) == null) {
             throw new ProjectNotFoundException(projectId);
         }
         projectService.deleteById(projectId);
-        return "Deleted project with ID: " + projectId;
+        return ResponseEntity.noContent().build();
     }
 
 

@@ -8,5 +8,11 @@ public interface UserService {
 	
 	User findByUsername(String username);
 
-    List<User> findAll();
+    List<User> findAll(String username);
+
+    void deleteByUsername(String username);
+
+    User save(User user);
+
+    User update(String username, User user);
 }

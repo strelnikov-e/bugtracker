@@ -2,15 +2,31 @@ package com.strelnikov.bugtracker.entity;
 
 import jakarta.persistence.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import static jakarta.persistence.CascadeType.PERSIST;
+import static jakarta.persistence.FetchType.LAZY;
+
 @Entity
 @Table(name="users")
 public class User {
 	
 	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
+
 	private String username;
 
+	@OneToMany(fetch = LAZY, mappedBy = "user", cascade = PERSIST)
+	private List<ProjectRole> projectRoles = new ArrayList<>();
+
+	@OneToMany(fetch = LAZY, mappedBy = "user", cascade = PERSIST)
+	private List<IssueRole> issueRoles = new ArrayList<>();
+
 	private String email;
-	
+
+	@Column(columnDefinition = "char")
 	private String password;
 	
 	private boolean enabled;
@@ -24,6 +40,7 @@ public class User {
 	@Column(name="company_name")
 	private String companyName;
 
+
 	public User() {
 		
 	}
@@ -36,6 +53,52 @@ public class User {
 		this.firstName = firstName;
 		this.lastName = lastName;
 		this.companyName = companyName;
+	}
+
+	public static User newUser(String username) {
+		final var user = new User();
+		user.username = username;
+		return user;
+	}
+
+	public void addIssueRole(Issue issue, IssueRoleType issueRoleType) {
+		final var issueRole = new IssueRole();
+		issueRole.setIssue(issue);
+		issueRole.setType(issueRoleType);
+		issueRole.setUser(this);
+		issueRoles.add(issueRole);
+	}
+
+	public void addProjectRole(Project project, ProjectRoleType projectRoleType) {
+		final var projectRole = new ProjectRole();
+		projectRole.setProject(project);
+		projectRole.setType(projectRoleType);
+		projectRole.setUser(this);
+		projectRoles.add(projectRole);
+	}
+
+	public List<ProjectRole> getProjectRoles() {
+		return projectRoles;
+	}
+
+	public void setProjectRoles(List<ProjectRole> projectRoles) {
+		this.projectRoles = projectRoles;
+	}
+
+	public List<IssueRole> getIssueRoles() {
+		return issueRoles;
+	}
+
+	public void setIssueRoles(List<IssueRole> issueRoles) {
+		this.issueRoles = issueRoles;
+	}
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
 	}
 
 	public String getUsername() {

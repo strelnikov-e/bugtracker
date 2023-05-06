@@ -14,7 +14,7 @@ public class IssueModelAssembler implements RepresentationModelAssembler<Issue, 
     public EntityModel<Issue> toModel(Issue issue) {
         return EntityModel.of(issue,
                 linkTo(methodOn(IssueRestController.class).getById(issue.getId())).withSelfRel(),
-                linkTo(methodOn(IssueRestController.class).all(issue.getName())).withRel("issues"));
+                linkTo(methodOn(IssueRestController.class).all(issue.getProject().getId())).withRel("issues"));
 
     }
 }

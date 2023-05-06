@@ -1,4 +1,4 @@
-package com.strelnikov.bugtracker.dao;
+package com.strelnikov.bugtracker.repository;
 
 import com.strelnikov.bugtracker.entity.Issue;
 import org.springframework.data.jpa.repository.JpaRepository;

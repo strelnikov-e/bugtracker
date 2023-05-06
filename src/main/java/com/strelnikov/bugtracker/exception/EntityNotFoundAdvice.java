@@ -10,6 +10,20 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 public class EntityNotFoundAdvice {
 
     @ResponseBody
+    @ExceptionHandler(UserNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    String UserNotFoundHandler(UserNotFoundException exception) {
+        return exception.getMessage();
+    }
+
+    @ResponseBody
+    @ExceptionHandler(UserAlreadyExistsException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    String UserAlreadyExistsHandler(UserAlreadyExistsException exception) {
+        return exception.getMessage();
+    }
+
+    @ResponseBody
     @ExceptionHandler(ProjectNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     String ProjectNotFoundHandler(ProjectNotFoundException exception) {

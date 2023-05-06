@@ -6,23 +6,24 @@ SET FOREIGN_KEY_CHECKS = 0;
 DROP TABLE IF EXISTS `users`;
 
 create table `users` (
-`username` varchar(50),
-`email` varchar(50) not null UNIQUE,
-`password` char(68) not null,
-`enabled` tinyint not null,
-`first_name` varchar(50) not null,
-`last_name` varchar(50) not null, 
+`id` BIGINT NOT NULL AUTO_INCREMENT,
+`username` varchar(50) NOT NULL UNIQUE,
+`email` varchar(50) NOT NULL UNIQUE,
+`password` char(68) NOT NULL,
+`enabled` tinyint DEFAULT 1,
+`first_name` varchar(50) NOT NULL,
+`last_name` varchar(50) NOT NULL,
 `company_name` varchar(50),
-PRIMARY KEY (`username`)
+PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 DROP TABLE IF EXISTS `authorities`;
 
 create table `authorities` (
-`username` varchar(50) NOT NULL,
+`user_id` BIGINT NOT NULL,
 `authority` varchar(50) NOT NULL,
-UNIQUE KEY `authorities_idx_1` (`username`,`authority`),
-CONSTRAINT `authorities_ibfk_1` FOREIGN KEY (`username`) REFERENCES `users`(`username`)
+UNIQUE KEY `authorities_idx_1` (`user_id`,`authority`),
+CONSTRAINT `authorities_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users`(`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 DROP TABLE IF EXISTS `projects`;
@@ -41,15 +42,15 @@ PRIMARY KEY (`id`),
 CONSTRAINT `UNIQUE_key` UNIQUE(`keyword`,`lead_username`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 
-DROP TABLE IF EXISTS `users-projects`;
+DROP TABLE IF EXISTS `users_projects`;
 
-create table `users-projects` (
-`username` varchar(50) NOT NULL,
+create table `users_projects` (
+`user_id` BIGINT NOT NULL,
 `project_id` bigint NOT NULL,
 `authority` varchar(50) NOT NULL,
-UNIQUE KEY `authorities_idx_1` (`username`,`project_id`,`authority`),
-CONSTRAINT `user_id-project` FOREIGN KEY (`username`) REFERENCES `users`(`username`),
-CONSTRAINT `user-project_id` FOREIGN KEY (`project_id`) REFERENCES `projects`(`id`)
+UNIQUE KEY `authorities_idx_1` (`user_id`,`project_id`,`authority`),
+CONSTRAINT `FK_user_project_id_1` FOREIGN KEY (`user_id`) REFERENCES `users`(`id`),
+CONSTRAINT `FK_user_project_id_2` FOREIGN KEY (`project_id`) REFERENCES `projects`(`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 DROP TABLE IF EXISTS `issues`;
@@ -67,8 +68,10 @@ create table `issues` (
 `due_date` date,
 `closed_date` date,
 `project_id` bigint,
-PRIMARY KEY (`id`)
+PRIMARY KEY (`id`),
+CONSTRAINT `FK_project_id` FOREIGN KEY (`project_id`) REFERENCES `projects`(`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
+
 
 DROP TABLE IF EXISTS `tags`;
 
@@ -78,37 +81,36 @@ create table `tags` (
 primary key (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
-DROP TABLE IF EXISTS `tags-issues`;
-DROP TABLE IF EXISTS `issues-tags`;
 
+DROP TABLE IF EXISTS `issues_tags`;
 
-CREATE TABLE `issues-tags` (
+CREATE TABLE `issues_tags` (
   `tag_id` bigint NOT NULL,
   `issue_id` bigint NOT NULL,
   PRIMARY KEY (`tag_id`,`issue_id`),
-  CONSTRAINT `FK_issues_tags_TAG` FOREIGN KEY (`tag_id`) REFERENCES `tags` (`id`) 
+  CONSTRAINT `FK_issues_tags_TAG` FOREIGN KEY (`tag_id`) REFERENCES `tags` (`id`)
   ON DELETE NO ACTION ON UPDATE NO ACTION,
-  CONSTRAINT `FK_issues_tags_ISSUE` FOREIGN KEY (`issue_id`) REFERENCES `issue` (`id`) 
+  CONSTRAINT `FK_issues_tags_ISSUE` FOREIGN KEY (`issue_id`) REFERENCES `issues` (`id`)
   ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 
 
 INSERT INTO `users` (`username`,`email`,`password`, `enabled`, `first_name`,`last_name`)
-VALUES 
+VALUES
         ("john","john@mail.com","{bcrypt}$2a$12$nfqMxM39kfD5mS04Y5ChcujGQPZBWyenO/rbqT79pRuALP.Zrx.H.",1 ,"John","Doe"),
         ("mary","mary@mail.com","{bcrypt}$2a$12$nfqMxM39kfD5mS04Y5ChcujGQPZBWyenO/rbqT79pRuALP.Zrx.H.",1 ,"Mary","Jane"),
         ("susan","susan@mail.com","{bcrypt}$2a$12$nfqMxM39kfD5mS04Y5ChcujGQPZBWyenO/rbqT79pRuALP.Zrx.H.",1 ,"Susan","Park");
 
 INSERT INTO `authorities`
 VALUES
-        ("john","ROLE_EMPLOYEE"),
-        ("mary","ROLE_EMPLOYEE"),
-        ("mary","ROLE_MANAGER"),
-        ("susan","ROLE_EMPLOYEE"),
-        ("susan","ROLE_MANAGER"),
-        ("susan","ROLE_ADMIN");
-        
+        (1,"ROLE_EMPLOYEE"),
+        (2,"ROLE_EMPLOYEE"),
+        (2,"ROLE_MANAGER"),
+        (3,"ROLE_EMPLOYEE"),
+        (3,"ROLE_MANAGER"),
+        (3,"ROLE_ADMIN");
+
 
 
 
@@ -121,21 +123,21 @@ VALUES
         "Demo blog project",
         "BLG","john","2023-04-22","2023-06-20");
 
-INSERT INTO `users-projects`
-VALUES   
-        ("john",1,"ROLE_EMPLOYEE"),
-        ("mary",1,"ROLE_EMPLOYEE"),
-        ("mary",1,"ROLE_MANAGER"),
-        ("susan",1,"ROLE_EMPLOYEE"),
-        ("susan",1,"ROLE_MANAGER"),
-        ("susan",1,"ROLE_ADMIN"),
-        ("mary",2,"ROLE_EMPLOYEE"),
-        ("susan",2,"ROLE_EMPLOYEE"),
-        ("susan",2,"ROLE_MANAGER"),
-        ("susan",2,"ROLE_ADMIN");
+INSERT INTO `users_projects`
+VALUES
+        (1,1,"ROLE_EMPLOYEE"),
+        (2,1,"ROLE_EMPLOYEE"),
+        (2,1,"ROLE_MANAGER"),
+        (3,1,"ROLE_EMPLOYEE"),
+        (3,1,"ROLE_MANAGER"),
+        (3,1,"ROLE_ADMIN"),
+        (2,2,"ROLE_EMPLOYEE"),
+        (3,2,"ROLE_EMPLOYEE"),
+        (3,2,"ROLE_MANAGER"),
+        (3,2,"ROLE_ADMIN");
 
 INSERT INTO `issues` (`name`,`description`,`assignee`,`reporter`,`start_date`,`due_date`,`project_id`)
-VALUES 
+VALUES
         ("Create issues database",
         "Develop a database with field required to account issues for a specific project",
         "john","mary","2023-04-11","2023-04-30",1),
@@ -151,19 +153,19 @@ VALUES
         ("Design user interface",
         "Develop a database with user specific information for blog",
         "john","susan","2023-04-22","2023-05-30",2);
-        
-        
+
+
 INSERT INTO `tags` (`name`)
-VALUES   
+VALUES
         ("database"),
         ("design"),
         ("issues"),
         ("projects"),
         ("users"),
         ("UI");
-        
-INSERT INTO `issues-tags`
-VALUES   
+
+INSERT INTO `issues_tags`
+VALUES
         (1,1),
         (1,2),
         (1,3),
