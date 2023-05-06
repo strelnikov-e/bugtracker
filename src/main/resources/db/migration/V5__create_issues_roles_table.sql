@@ -1,4 +1,4 @@
-create table `issues-roles` 
+create table `issues_roles`
 (
 `id` BIGINT PRIMARY KEY AUTO_INCREMENT,
 `user_id` BIGINT NOT NULL,
