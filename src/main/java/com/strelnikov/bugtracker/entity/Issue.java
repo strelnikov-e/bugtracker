@@ -1,5 +1,6 @@
 package com.strelnikov.bugtracker.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import org.hibernate.Hibernate;
 
@@ -18,8 +19,9 @@ public class Issue {
 
 	private String name;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "project_id", updatable = false)
+	@ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name = "project_id")
+	@JsonIgnore
 	private Project project;
 
 	private String description;

@@ -15,4 +15,5 @@ public interface ProjectService {
 
     void deleteById(Long projectId);
 
+    Project create(Project project);
 }

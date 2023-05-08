@@ -50,9 +50,9 @@ public class IssueRestController {
 
     @PostMapping("/issues")
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<?> createIssue(@RequestBody Issue requestIssue) {
+    public ResponseEntity<?> createIssue(@RequestParam Long projectId, @RequestBody Issue requestIssue) {
         requestIssue.setId(0L);
-        EntityModel<Issue> entityModel = assembler.toModel(issueService.create(requestIssue));
+        EntityModel<Issue> entityModel = assembler.toModel(issueService.create(requestIssue, projectId));
         return ResponseEntity.created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri()).body(entityModel);
     }
 
@@ -63,6 +63,8 @@ public class IssueRestController {
     }
 
 
+    // Delete an issue and and entry(s) in issue_role table
+    // * IMPLEMENT: delete associated tags if orphaned
     @DeleteMapping("/issues/{issueId}")
     public ResponseEntity<?> deleteIssue(@PathVariable Long issueId) {
         issueService.deleteById(issueId);

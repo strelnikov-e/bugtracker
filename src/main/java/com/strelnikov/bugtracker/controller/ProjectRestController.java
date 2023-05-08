@@ -7,6 +7,7 @@ import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -27,7 +28,9 @@ public class ProjectRestController {
         this.assembler = assembler;
     }
 
+    // Get all projects
     @GetMapping("/projects")
+    @PreAuthorize("isAuthenticated")
     public CollectionModel<EntityModel<Project>> all(@RequestParam(value = "name", defaultValue = "", required = false) String name) {
         List<EntityModel<Project>> projects = projectService.findByName(name).stream()
                 .map(assembler::toModel)
@@ -35,7 +38,9 @@ public class ProjectRestController {
         return CollectionModel.of(projects, linkTo(methodOn(ProjectRestController.class).all(name)).withSelfRel());
     }
 
+    // Get project by ID
     @GetMapping("/projects/{projectId}")
+    @PreAuthorize("@RoleService.hasAnyRoleByProjectId(#projectId, @ProjectRole.MANAGER)")
     public EntityModel<Project> getById(@PathVariable Long projectId) {
         Project project = projectService.findById(projectId);
         if (project == null) {
@@ -44,24 +49,26 @@ public class ProjectRestController {
         return assembler.toModel(project);
     }
 
+    // Create new project and set project admin to current user
     @PostMapping("/projects")
-    public ResponseEntity<?> addProject(@RequestBody Project project) {
-        project.setId(0L);
-        EntityModel<Project> entityModel = assembler.toModel(projectService.save(project));
+    @PreAuthorize("isAuthenticated")
+    public ResponseEntity<?> createProject(@RequestBody Project project) {
+        EntityModel<Project> entityModel = assembler.toModel(projectService.create(project));
         return ResponseEntity.created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri()).body(entityModel);
     }
 
-    @PutMapping("/projects")
-    public ResponseEntity<?> updateProject(@RequestBody Project project) {
+    // Update project
+    @PutMapping("/projects/{projectId}")
+    @PreAuthorize("@RoleService.hasAnyRoleByProjectId(#projectId, @ProjectRole.MANAGER)")
+    public ResponseEntity<?> updateProject(@PathVariable Long projectId, @RequestBody Project project) {
+        project.setId(projectId);
         EntityModel<Project> entityModel = assembler.toModel(projectService.save(project));
         return ResponseEntity.created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri()).body(entityModel);
     }
 
     @DeleteMapping("/projects/{projectId}")
+    @PreAuthorize("@RoleService.hasAnyRoleByProjectId(#projectId, @ProjectRole.ADMIN)")
     public ResponseEntity<?> deleteProject(@PathVariable Long projectId) {
-        if (projectService.findById(projectId) == null) {
-            throw new ProjectNotFoundException(projectId);
-        }
         projectService.deleteById(projectId);
         return ResponseEntity.noContent().build();
     }

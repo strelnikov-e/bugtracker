@@ -37,25 +37,25 @@ VALUES
 
 INSERT INTO `projects_roles` (`user_id`, `project_id`, `type`)
 VALUES
-		(1,1,"ROLE_ADMIN"),
-        (2,2,"ROLE_ADMIN"),
-        (3,1,"ROLE_MANAGER");
+		(1,1,"ADMIN"),
+        (2,2,"ADMIN"),
+        (3,1,"MANAGER");
         
 INSERT INTO `issues_roles` (`user_id`, `issue_id`, `type`)
 VALUES
-		(1,1,"ROLE_VIEWER"),
-        (1,2,"ROLE_VIEWER"),
-        (1,3,"ROLE_VIEWER"),
-        (1,4,"ROLE_ASSIGNEE"),
-        (1,5,"ROLE_REPORTER"),
-        (2,1,"ROLE_ASSIGNEE"),
-        (2,2,"ROLE_REPORTER"),
-        (2,3,"ROLE_VIEWER"),
-        (2,4,"ROLE_VIEWER"),
-        (2,5,"ROLE_VIEWER"),
-        (3,1,"ROLE_VIEWER"),
-        (3,2,"ROLE_VIEWER"),
-        (3,3,"ROLE_VIEWER");
+		(1,1,"VIEWER"),
+        (1,2,"VIEWER"),
+        (1,3,"VIEWER"),
+        (1,4,"ASSIGNEE"),
+        (1,5,"REPORTER"),
+        (2,1,"ASSIGNEE"),
+        (2,2,"REPORTER"),
+        (2,3,"VIEWER"),
+        (2,4,"VIEWER"),
+        (2,5,"VIEWER"),
+        (3,1,"VIEWER"),
+        (3,2,"VIEWER"),
+        (3,3,"VIEWER");
 
 INSERT INTO `tags` (`name`)
 VALUES

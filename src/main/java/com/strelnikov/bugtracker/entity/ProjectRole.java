@@ -14,11 +14,11 @@ public class ProjectRole {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", updatable = false)
+    @JoinColumn(name = "user_id")
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "project_id", updatable = false)
+    @JoinColumn(name = "project_id")
     private Project project;
 
     @Enumerated(EnumType.STRING)

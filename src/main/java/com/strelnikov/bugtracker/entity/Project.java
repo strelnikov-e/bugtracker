@@ -1,5 +1,6 @@
 package com.strelnikov.bugtracker.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import org.hibernate.Hibernate;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -21,6 +22,7 @@ public class Project {
     private String name;
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "project")
+    @JsonIgnore
     private List<Issue> issues = new ArrayList<>();
 
     @Column

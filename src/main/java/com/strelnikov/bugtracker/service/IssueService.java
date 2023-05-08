@@ -14,7 +14,7 @@ public interface IssueService {
 
     void deleteById(Long issueId);
 
-    Issue create(Issue issue);
+    Issue create(Issue issue, Long projectId);
 
     Issue update(Long issueId, Issue requestIssue);
 

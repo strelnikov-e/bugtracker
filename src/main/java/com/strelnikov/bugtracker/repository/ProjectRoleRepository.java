@@ -21,4 +21,6 @@ public interface ProjectRoleRepository extends JpaRepository<ProjectRole, Long> 
         WHERE pr.user.id = :userId AND i.id = :issueId
         """)
     Set<ProjectRoleType> findRoleTypesByUserIdAndIssueId(Long userId, Long issueId);
+
+    void deleteAllByProjectId(Long projectId);
 }

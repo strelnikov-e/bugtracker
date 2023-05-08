@@ -1,10 +1,12 @@
 package com.strelnikov.bugtracker.service;
 
-import com.strelnikov.bugtracker.repository.IssueRepository;
-import com.strelnikov.bugtracker.repository.ProjectRepository;
 import com.strelnikov.bugtracker.entity.Issue;
+import com.strelnikov.bugtracker.entity.Project;
 import com.strelnikov.bugtracker.exception.IssueNotFoundException;
 import com.strelnikov.bugtracker.exception.ProjectNotFoundException;
+import com.strelnikov.bugtracker.repository.IssueRepository;
+import com.strelnikov.bugtracker.repository.IssueRoleRepository;
+import com.strelnikov.bugtracker.repository.ProjectRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,19 +17,22 @@ import java.util.List;
 public class IssueServiceImpl implements IssueService {
 
 	IssueRepository issueRepository;
+	IssueRoleRepository issueRoleRepository;
 	ProjectRepository projectRepository;
 
-	public IssueServiceImpl(IssueRepository issueRepository, ProjectRepository projectRepository) {
+	public IssueServiceImpl(IssueRepository issueRepository, IssueRoleRepository issueRoleRepository, ProjectRepository projectRepository) {
 		this.issueRepository = issueRepository;
+		this.issueRoleRepository = issueRoleRepository;
 		this.projectRepository = projectRepository;
 	}
 
-
 	@Override
+	@Transactional
 	public void deleteById(Long issueId) {
 		if (!issueRepository.existsById(issueId)) {
 			throw new IssueNotFoundException(issueId);
 		}
+		issueRoleRepository.deleteAllByIssueId(issueId);
 		issueRepository.deleteById(issueId);
 	}
 
@@ -84,11 +89,11 @@ public class IssueServiceImpl implements IssueService {
 	}
 
 	@Override
-	public Issue create(Issue issue) {
-		Issue newIssue = projectRepository.findById(issue.getProject().getId()).map(project -> {
-					return issueRepository.save(issue);
-				}).orElseThrow(() -> new ProjectNotFoundException(issue.getProject().getId()));
-		return newIssue;
+	public Issue create(Issue issue, Long projectId) {
+		Project project = projectRepository.findById(projectId)
+				.orElseThrow(() ->new ProjectNotFoundException(projectId));
+		issue.setProject(project);
+		return issueRepository.save(issue);
 	}
 
 	@Override

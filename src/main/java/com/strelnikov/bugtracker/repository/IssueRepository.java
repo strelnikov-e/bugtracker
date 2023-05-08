@@ -18,4 +18,5 @@ public interface IssueRepository extends JpaRepository<Issue, Long> {
 
     List<Issue> findByNameContaining(String name);
 
+    void deleteAllByProjectId(Long projectId);
 }

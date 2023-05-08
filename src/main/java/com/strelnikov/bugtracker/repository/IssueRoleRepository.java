@@ -22,4 +22,6 @@ public interface IssueRoleRepository extends JpaRepository<IssueRole, Long> {
             WHERE ir.user.id = :userId AND ir.issue.id = :issueId
             """)
     Set<IssueRoleType> findRoleTypesByUserIdAndIssueId(Long userId, Long issueId);
+
+    void deleteAllByIssueId(Long issueId);
 }
