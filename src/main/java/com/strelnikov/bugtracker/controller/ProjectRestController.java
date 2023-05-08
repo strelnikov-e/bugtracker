@@ -28,7 +28,7 @@ public class ProjectRestController {
         this.assembler = assembler;
     }
 
-    // Get all projects
+    // Get all projects of current user
     @GetMapping("/projects")
     @PreAuthorize("isAuthenticated")
     public CollectionModel<EntityModel<Project>> all(@RequestParam(value = "name", defaultValue = "", required = false) String name) {
@@ -62,10 +62,11 @@ public class ProjectRestController {
     @PreAuthorize("@RoleService.hasAnyRoleByProjectId(#projectId, @ProjectRole.MANAGER)")
     public ResponseEntity<?> updateProject(@PathVariable Long projectId, @RequestBody Project project) {
         project.setId(projectId);
-        EntityModel<Project> entityModel = assembler.toModel(projectService.save(project));
+        EntityModel<Project> entityModel = assembler.toModel(projectService.update(project));
         return ResponseEntity.created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri()).body(entityModel);
     }
 
+    // delete project and all the issues of the project
     @DeleteMapping("/projects/{projectId}")
     @PreAuthorize("@RoleService.hasAnyRoleByProjectId(#projectId, @ProjectRole.ADMIN)")
     public ResponseEntity<?> deleteProject(@PathVariable Long projectId) {

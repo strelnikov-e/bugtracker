@@ -9,7 +9,7 @@ public interface ProjectService {
 
     List<Project> findByName(String name);
 
-    Project save(Project project);
+    Project update(Project project);
 
     Project findById(Long id);
 

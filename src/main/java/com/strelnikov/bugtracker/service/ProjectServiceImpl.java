@@ -39,6 +39,22 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
+    public List<Project> findByName(String name) {
+        if (name == null) {
+            name = "";
+        }
+        Long userId = getCurrentUser().getId();
+        System.out.println("UserID: " + userId);
+        return projectRepository.findByUserIdAndByNameContaining(userId, name);
+    }
+
+    @Override
+    public Project findById(Long projectId) {
+        return projectRepository.findById(projectId)
+                .orElseThrow(() -> new ProjectNotFoundException(projectId));
+    }
+
+    @Override
     @Transactional
     public Project create(Project project) {
         project.setId(0L);
@@ -50,25 +66,8 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     @Transactional
-    public Project save(Project project) {
-        Project newProject = projectRepository.save(project);
-        final User currentUser = this.getCurrentUser();
-        currentUser.addProjectRole(project, ProjectRoleType.ADMIN);
-        return newProject;
-    }
-
-    @Override
-    public List<Project> findByName(String name) {
-        if (name == null) {
-            name = "";
-        }
-        return projectRepository.findByNameContaining(name);
-    }
-
-    @Override
-    public Project findById(Long projectId) {
-        return projectRepository.findById(projectId)
-                .orElseThrow(() -> new ProjectNotFoundException(projectId));
+    public Project update(Project project) {
+        return projectRepository.save(project);
     }
 
     @Override

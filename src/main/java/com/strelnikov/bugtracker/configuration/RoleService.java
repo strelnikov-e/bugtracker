@@ -43,15 +43,15 @@ public class RoleService {
     @Transactional
     public boolean hasAnyRoleByIssueId(Long issueId, Role... roles) {
         final Long userId = getCurrentAuthentication().getPrincipal();
-        final Set<IssueRoleType> issueRoleTypes = issueRoleRepository.findRoleTypesByUserIdAndIssueId(userId, issueId);
+        final Set<ProjectRoleType> projectRoleTypes = projectRoleRepository.findRoleTypesByUserIdAndIssueId(userId, issueId);
         for (Role role : roles) {
-            if (issueRoleTypes.stream().anyMatch(issueRoleType -> issueRoleType.includes(role))) {
+            if (projectRoleTypes.stream().anyMatch(projectRoleType -> projectRoleType.includes(role))) {
                 return true;
             }
         }
-        final Set<ProjectRoleType> projectRoleTypes = projectRoleRepository.findRoleTypesByUserIdAndIssueId(userId, issueId);
+        final Set<IssueRoleType> issueRoleTypes = issueRoleRepository.findRoleTypesByUserIdAndIssueId(userId, issueId);
         for (Role role : roles) {
-            if (issueRoleTypes.stream().anyMatch(projectRoleType -> projectRoleType.includes(role))) {
+            if (issueRoleTypes.stream().anyMatch(issueRoleType -> issueRoleType.includes(role))) {
                 return true;
             }
         }
