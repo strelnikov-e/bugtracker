@@ -11,6 +11,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
@@ -29,19 +30,22 @@ public class IssueRestController {
     }
 
 
+    // find all issues for current user with optional projectId and name
     @GetMapping("/issues")
     @PreAuthorize("isAuthenticated")
-    public CollectionModel<EntityModel<Issue>> all(@RequestParam(value = "project",defaultValue = "0",required = false) Long projectId) {
-        if (projectId != 0L) {
-            List<EntityModel<Issue>> issues = issueService.findByProjectId(projectId).stream()
-                    .map(assembler::toModel)
-                    .collect(Collectors.toList());
-            return CollectionModel.of(issues, linkTo(methodOn(IssueRestController.class).all(projectId)).withSelfRel());
-        }
-        List<EntityModel<Issue>> issues = issueService.findByName("").stream()
+    public CollectionModel<EntityModel<Issue>> all(
+            @RequestParam(value = "projectId",defaultValue = "0") Long projectId,
+            @RequestParam(value = "name", defaultValue = "") String name) {
+
+        List<EntityModel<Issue>> issues = issueService.findByName(name).stream()
                 .map(assembler::toModel)
                 .collect(Collectors.toList());
-        return CollectionModel.of(issues, linkTo(methodOn(IssueRestController.class).all(0L)).withSelfRel());
+        if (projectId != 0L) {
+            issues = issues.stream()
+                    .filter(issue -> Objects.requireNonNull(issue.getContent()).getProject().getId() == projectId)
+                    .collect(Collectors.toList());
+        }
+        return CollectionModel.of(issues, linkTo(methodOn(IssueRestController.class).all(0L, name)).withSelfRel());
     }
 
     // get issue by issueId, return 403 if user is not authorized to see issue

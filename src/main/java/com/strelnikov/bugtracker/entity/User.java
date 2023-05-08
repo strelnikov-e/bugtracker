@@ -1,5 +1,6 @@
 package com.strelnikov.bugtracker.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.util.ArrayList;
@@ -19,9 +20,11 @@ public class User {
 	private String username;
 
 	@OneToMany(fetch = LAZY, mappedBy = "user", cascade = PERSIST)
+	@JsonIgnore
 	private List<ProjectRole> projectRoles = new ArrayList<>();
 
 	@OneToMany(fetch = LAZY, mappedBy = "user", cascade = PERSIST)
+	@JsonIgnore
 	private List<IssueRole> issueRoles = new ArrayList<>();
 
 	private String email;

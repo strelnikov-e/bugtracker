@@ -1,16 +1,21 @@
 package com.strelnikov.bugtracker.service;
 
+import com.strelnikov.bugtracker.configuration.PlainAuthentication;
 import com.strelnikov.bugtracker.entity.Issue;
 import com.strelnikov.bugtracker.entity.Project;
+import com.strelnikov.bugtracker.entity.User;
 import com.strelnikov.bugtracker.exception.IssueNotFoundException;
 import com.strelnikov.bugtracker.exception.ProjectNotFoundException;
 import com.strelnikov.bugtracker.repository.IssueRepository;
 import com.strelnikov.bugtracker.repository.IssueRoleRepository;
 import com.strelnikov.bugtracker.repository.ProjectRepository;
+import com.strelnikov.bugtracker.repository.UserRepository;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 @Service
@@ -19,11 +24,19 @@ public class IssueServiceImpl implements IssueService {
 	IssueRepository issueRepository;
 	IssueRoleRepository issueRoleRepository;
 	ProjectRepository projectRepository;
+	UserRepository userRepository;
 
-	public IssueServiceImpl(IssueRepository issueRepository, IssueRoleRepository issueRoleRepository, ProjectRepository projectRepository) {
+	public IssueServiceImpl(IssueRepository issueRepository, IssueRoleRepository issueRoleRepository,
+							ProjectRepository projectRepository, UserRepository userRepository) {
 		this.issueRepository = issueRepository;
 		this.issueRoleRepository = issueRoleRepository;
 		this.projectRepository = projectRepository;
+		this.userRepository = userRepository;
+	}
+
+	private User getCurrentUser() {
+		final var userId = ((PlainAuthentication) SecurityContextHolder.getContext().getAuthentication()).getPrincipal();
+		return userRepository.findById(userId).orElseThrow();
 	}
 
 	@Override
@@ -36,13 +49,6 @@ public class IssueServiceImpl implements IssueService {
 		issueRepository.deleteById(issueId);
 	}
 
-	@Override
-	public List<Issue> findByName(String name) {
-		if (name == null) {
-			name = "";
-		}
-		return issueRepository.findByNameContaining(name);
-	}
 
 
 	@Override
@@ -71,11 +77,30 @@ public class IssueServiceImpl implements IssueService {
 	}
 
 	@Override
+	public List<Issue> findByName(String name) {
+		Long userId = getCurrentUser().getId();
+
+		if (name == null || name.equals("")) {
+			name = "%";
+		}
+		else {
+			name = '%' + name + '%';
+		}
+		System.out.println("userId: " + userId + " name: " + name);
+		return issueRepository.findByUserIdAndNameContaining(userId, name);
+	}
+
+	@Override
 	public List<Issue> findByProjectId(Long projectId) {
 		if (!projectRepository.existsById(projectId)) {
 			throw new ProjectNotFoundException(projectId);
 		}
 		return issueRepository.findAllByProjectId(projectId);
+	}
+
+	@Override
+	public Collection<Issue> projectIdAndNameContaining(Long projectId, String name) {
+		return issueRepository.findByProjectIdAndNameContaining(projectId, name);
 	}
 
 	@Override
