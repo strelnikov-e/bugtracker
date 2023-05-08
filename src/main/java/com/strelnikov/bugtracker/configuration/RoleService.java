@@ -3,8 +3,10 @@ package com.strelnikov.bugtracker.configuration;
 import com.strelnikov.bugtracker.entity.IssueRoleType;
 import com.strelnikov.bugtracker.entity.ProjectRoleType;
 import com.strelnikov.bugtracker.entity.Role;
+import com.strelnikov.bugtracker.entity.UserRoleType;
 import com.strelnikov.bugtracker.repository.IssueRoleRepository;
 import com.strelnikov.bugtracker.repository.ProjectRoleRepository;
+import com.strelnikov.bugtracker.repository.UserRoleRepository;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,10 +18,13 @@ public class RoleService {
 
     private final ProjectRoleRepository projectRoleRepository;
     private final IssueRoleRepository issueRoleRepository;
+    private final UserRoleRepository userRoleRepository;
 
-    public RoleService(ProjectRoleRepository projectRoleRepository, IssueRoleRepository issueRoleRepository) {
+    public RoleService(ProjectRoleRepository projectRoleRepository,
+                       IssueRoleRepository issueRoleRepository, UserRoleRepository userRoleRepository) {
         this.projectRoleRepository = projectRoleRepository;
         this.issueRoleRepository = issueRoleRepository;
+        this.userRoleRepository = userRoleRepository;
     }
 
     @Transactional
@@ -58,8 +63,20 @@ public class RoleService {
         return false;
     }
 
+    @Transactional
+    public boolean hasRootRole() {
+        final Long userId = getCurrentAuthentication().getPrincipal();
+        final Set<UserRoleType> userRoleTypes = userRoleRepository.findAllByUserId(userId);
+        for (Role role : userRoleTypes) {
+            if (role == UserRoleType.ROOT) return true;
+        }
+        return false;
+    }
+
     private static PlainAuthentication getCurrentAuthentication() {
         return (PlainAuthentication) SecurityContextHolder.getContext().getAuthentication();
     }
 
 }
+
+

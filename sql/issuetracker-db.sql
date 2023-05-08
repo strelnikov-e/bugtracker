@@ -26,9 +26,9 @@ create table `projects`
 `name` varchar(50) not null,
 `description` text,
 `keyword` char(3),
-`lead_username` varchar(50) not null,
+`lead_username` varchar(50),
 `status` char(4) default "OPEN",
-`start_date` date not null,
+`start_date` date,
 `due_date` date,
 `end_date` date,
 PRIMARY KEY (`id`),
@@ -47,13 +47,24 @@ create table `issues`
 `status` char(4) default "OPEN",
 `severity` char(3) default "MED",
 `reproducible` bool default 0,
-`start_date` date not null,
+`start_date` date,
 `due_date` date,
 `closed_date` date,
 `project_id` bigint,
 PRIMARY KEY (`id`),
 CONSTRAINT `FK_issues_project_id` FOREIGN KEY (`project_id`) REFERENCES `projects`(`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
+
+DROP TABLE IF EXISTS `users_roles`;
+
+create table `users_roles` 
+(
+`id` BIGINT PRIMARY KEY AUTO_INCREMENT,
+`user_id` BIGINT NOT NULL,
+`type` varchar(50) NOT NULL,
+UNIQUE KEY `UK_users_roles` (`user_id`,`type`),
+CONSTRAINT `FK_users_roles_id` FOREIGN KEY (`user_id`) REFERENCES `users`(`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 DROP TABLE IF EXISTS `projects_roles`;
 
