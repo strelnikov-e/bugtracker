@@ -15,7 +15,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.Map;
 
-public class ControllerTest extends AbstractControllerTest {
+public class ProjectControllerTest extends AbstractControllerTest {
 
     @Autowired
     private TransactionTemplate transactionTemplate;

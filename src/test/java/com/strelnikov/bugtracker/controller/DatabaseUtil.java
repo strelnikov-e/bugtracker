@@ -13,7 +13,8 @@ public class DatabaseUtil {
             "projects_roles",
             "issues_roles",
             "tags",
-            "issues_tags"
+            "issues_tags",
+            "users_roles"
     );
 
     public static void cleanDatabase(JdbcTemplate jdbcTemplate) {
