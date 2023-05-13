@@ -8,7 +8,7 @@ create table `issues`
 `status` char(4) default "OPEN",
 `severity` char(3) default "MED",
 `reproducible` bool default 0,
-`start_date` date not null,
+`start_date` date,
 `due_date` date,
 `closed_date` date,
 `project_id` bigint,

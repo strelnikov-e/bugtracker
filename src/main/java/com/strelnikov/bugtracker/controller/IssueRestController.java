@@ -5,7 +5,6 @@ import com.strelnikov.bugtracker.service.IssueService;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.IanaLinkRelations;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -58,7 +57,6 @@ public class IssueRestController {
 
     // create new issue for the project, return 403 if user is not authorized to see project
     @PostMapping("/issues")
-    @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("@RoleService.hasAnyRoleByProjectId(#projectId, @ProjectRole.MANAGER)")
     public ResponseEntity<?> createIssue(@RequestParam Long projectId, @RequestBody Issue requestIssue) {
         requestIssue.setId(0L);
