@@ -14,4 +14,6 @@ public interface UserRoleRepository extends JpaRepository<UserRole, Long> {
     WHERE user_role.user.id = :userId
     """)
     Set<UserRoleType> findAllByUserId(Long userId);
+
+    void deleteAllByUserId(Long userId);
 }

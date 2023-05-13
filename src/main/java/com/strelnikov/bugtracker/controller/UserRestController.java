@@ -22,6 +22,7 @@ public class UserRestController {
     private final UserService userService;
     private final UserModelAssembler assembler;
 
+
     public UserRestController(UserService userService, UserModelAssembler assembler) {
         this.userService = userService;
         this.assembler = assembler;
@@ -44,17 +45,18 @@ public class UserRestController {
    }
 
    @PutMapping("/users")
-   @PreAuthorize("isAuthenticated")
+   @PreAuthorize("@RoleService.hasRootRole() or isAuthenticated")
     public  ResponseEntity<?> update(@RequestParam(value = "username") String username, @RequestBody User user) {
         EntityModel<User> entityModel = assembler.toModel(userService.update(username, user));
         return ResponseEntity.created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri()).body(entityModel);
    }
 
+   // to implement cascading delete of all user orphaned projects
    @DeleteMapping("/users")
    @PreAuthorize("@RoleService.hasRootRole()")
-    public ResponseEntity<?> delete(@RequestParam(value="username", defaultValue = "") String username) {
+    public ResponseEntity<?> delete(@RequestParam(value="username") String username) {
         userService.deleteByUsername(username);
+
         return ResponseEntity.noContent().build();
    }
-
 }

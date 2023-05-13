@@ -12,7 +12,8 @@ import org.testcontainers.lifecycle.Startables;
 
 import java.util.Map;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+        properties = "spring.flyway.clean-disabled=false")
 @ContextConfiguration(initializers = AbstractControllerTest.Initializer.class)
 public class AbstractControllerTest {
 

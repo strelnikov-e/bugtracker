@@ -43,4 +43,11 @@ public class EntityNotFoundAdvice {
     String TagNotFoundHandler(TagNotFoundException exception) {
         return exception.getMessage();
     }
+
+    @ResponseBody
+    @ExceptionHandler(AccessForbiddenException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    String AccessForbiddenHandler(AccessForbiddenException exception) {
+        return exception.getMessage();
+    }
 }
