@@ -10,8 +10,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.IanaLinkRelations;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -37,6 +37,7 @@ public class TagRestController {
     }
 
     @GetMapping("/tags")
+    @PreAuthorize("isAuthenticated")
     public CollectionModel<EntityModel<Tag>> all(@RequestParam(value = "name", required = false) String name) {
         List<EntityModel<Tag>> tags = tagService.findByName(name).stream()
                 .map(assembler::toModel)
@@ -45,12 +46,14 @@ public class TagRestController {
     }
 
     @GetMapping("/tags/{tagId}")
+    @PreAuthorize("isAuthenticated")
     public EntityModel<Tag> getById(@PathVariable Long tagId) {
         Tag tag = tagService.findById(tagId);
         return assembler.toModel(tag);
     }
 
     @GetMapping("/issues/{issueId}/tags")
+    @PreAuthorize("@RoleService.hasAnyRoleByIssueId(#issueId, @IssueRole.VIEWER)")
     public CollectionModel<EntityModel<Tag>> getTagsByIssueId(@PathVariable Long issueId) {
         Issue issue = issueService.findById(issueId);
         if (issue == null) {
@@ -63,7 +66,7 @@ public class TagRestController {
     }
 
     @PostMapping("/issues/{issueId}/tags")
-    @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("@RoleService.hasAnyRoleByIssueId(#issueId, @IssueRole.ASSIGNEE)")
     public ResponseEntity<?> addTag(@PathVariable Long issueId, @RequestBody Tag tagRequest) {
         EntityModel<Tag> entityModel = assembler.toModel(tagService.addTag(issueId, tagRequest));
 
@@ -71,8 +74,8 @@ public class TagRestController {
     }
 
     @DeleteMapping("/issues/{issueId}/tags/{tagId}")
+    @PreAuthorize("@RoleService.hasAnyRoleByIssueId(#issueId, @IssueRole.ASSIGNEE)")
     public ResponseEntity<?> deleteTagFromIssue(@PathVariable Long tagId, @PathVariable Long issueId) {
-
         Issue issue = issueService.findById(issueId);
         Tag tag = tagService.findById(tagId);
         issue.getTags().remove(tag);

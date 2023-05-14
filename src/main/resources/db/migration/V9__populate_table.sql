@@ -27,7 +27,7 @@ VALUES
         ("Create projects database",
         "Develop a database with field required to account projects for an user",
         "john","mary","2023-04-11","2023-04-30",1),
-        ("Create users database",
+        ("Create users db",
         "Develop a database with user specific information",
         "mary","susan","2023-04-11","2023-04-30",1),
         ("Create users database",
@@ -38,7 +38,10 @@ VALUES
         "john","susan","2023-04-22","2023-05-30",2),
         ("Issue of test project",
         "Test issue",
-        "mary","susan","2023-04-22","2023-05-30",2);
+        "mary","susan","2023-04-22","2023-05-30",2),
+        ("Create test project database",
+        "Develop a database with field required to account issues for a specific project",
+        "john","mary","2023-04-11","2023-04-30",3);
 
 INSERT INTO `users_roles` (`user_id`, `type`)
 VALUES
@@ -58,12 +61,11 @@ VALUES
         (2,3,"VIEWER"),
         (2,4,"ASSIGNEE"),
         (2,5,"REPORTER"),
-        (3,1,"ASSIGNEE"),
         (3,2,"REPORTER"),
         (3,3,"VIEWER"),
         (3,4,"VIEWER"),
         (3,5,"VIEWER"),
-        (4,1,"VIEWER"),
+        (4,1,"ASSIGNEE"),
         (4,2,"VIEWER"),
         (4,3,"VIEWER"),
         (2,6,"ASSIGNEE");

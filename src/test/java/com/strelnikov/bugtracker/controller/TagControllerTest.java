@@ -1,6 +1,7 @@
 package com.strelnikov.bugtracker.controller;
 
 import com.strelnikov.bugtracker.entity.Issue;
+import com.strelnikov.bugtracker.entity.Tag;
 import com.strelnikov.bugtracker.repository.UserRepository;
 import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.Assertions;
@@ -17,7 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.support.TransactionTemplate;
 
-public class IssueControllerTest extends AbstractControllerTest {
+public class TagControllerTest extends AbstractControllerTest {
 
     @Autowired
     private TransactionTemplate transactionTemplate;
@@ -35,125 +36,92 @@ public class IssueControllerTest extends AbstractControllerTest {
     }
 
     @Test
-    void shouldReturn401UnauthorizedUserTryingToGetIssues() {
+    void shouldReturn401UnathorizedUserTryingToGetTags() {
         final var response =
-                restTemplate.getForEntity("/api/issues", ResponseEntity.class);
+                restTemplate.getForEntity("/api/tags", ResponseEntity.class);
         Assertions.assertEquals(response.getStatusCode(), HttpStatus.UNAUTHORIZED);
     }
 
     @Test
-    void shouldReturn403ForbiddenUserTryingToGetIssues() {
+    void shouldReturn403ForbiddenUserTryingToGetTagsForIssue() {
         final var response =
                 restTemplate
                         .withBasicAuth("mary", "password")
-                        .getForEntity("/api/issues/1", EntityModel.class);
+                        .getForEntity("/api/issues/1/tags", CollectionModel.class);
         Assertions.assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
     }
 
     @Test
-    void shouldGetIssuesListForCurrentUserSuccessfully() {
+    void shouldGetListOfTagsSuccessfully() {
         final var response =
                 restTemplate
                         .withBasicAuth("john", "password")
-                        .getForEntity("/api/issues", CollectionModel.class);
+                        .getForEntity("/api/issues/1/tags", CollectionModel.class);
         Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
-        Assertions.assertEquals(4,response.getBody().getContent().size());
+        Assertions.assertEquals(3,response.getBody().getContent().size());
     }
 
     @Test
-    void shouldGetIssuesListForProjectAndByNameSuccessfully() {
+    void shouldGetTagSuccesfully() {
         final var response =
                 restTemplate
                         .withBasicAuth("john", "password")
-                        .getForEntity("/api/issues?projectId=1&name=database", CollectionModel.class);
-        Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
-        Assertions.assertEquals(2,response.getBody().getContent().size());
-    }
-
-    @Test
-    void shouldGetIssueSuccessfully() {
-        final var response =
-                restTemplate
-                        .withBasicAuth("john", "password")
-                        .getForEntity("/api/issues/1",
+                        .getForEntity("/api/tags/1",
                                 EntityModel.class);
+        System.out.println(response);
         Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
-        Assertions.assertTrue(response.getBody().getContent().toString().contains("Create issues database"));
+        Assertions.assertTrue(response.getBody().getContent().toString().contains("id=1, name=database"));
     }
 
     @Test
-    void shouldReturn401IfUnauthorizedUserTryingToCreateIssue() {
-        Issue issue = createIssue();
+    void shouldReturn401IfUnauthorizedUserTryingToCreateTagForIssue() {
+        Tag tag = new Tag("TestTag");
         final var projectCreatedResponse =
                 restTemplate.postForEntity(
-                        "/api/issues",
-                        issue,
+                        "/api/issues/1/tags",
+                        tag,
                         ResponseEntity.class
                 );
         Assertions.assertEquals(HttpStatus.UNAUTHORIZED, projectCreatedResponse.getStatusCode());
     }
 
     @Test
-    void shouldCreateIssueSuccessfully() {
-        Issue issue = createIssue();
+    void shouldCreateTagForIssueSuccesfully() {
+        Tag tag = new Tag("TestTag");
         final var response =
                 restTemplate
                         .withBasicAuth("john", "password")
                         .postForEntity(
                                 "/api/issues?projectId=1",
-                                issue,
+                                tag,
                                 EntityModel.class
                         );
+        System.out.println(response);
         Assertions.assertEquals(HttpStatus.CREATED, response.getStatusCode());
-        Assertions.assertTrue(response.getBody().getContent().toString().contains("id=8, name=Test issue"));
+        Assertions.assertTrue(response.getBody().getContent().toString().contains("id=8, name=TestTag"));
     }
 
     @Test
-    void shouldReturn403ForbiddenTryingToCreateIssueByUnauthorizedUser() {
-        Issue issue = createIssue();
+    void shouldReturn403ForbiddenTryingToCreateTagForIssueByUnauthorizedUser() {
+        Tag tag = new Tag("TestTag");
         final var response =
                 restTemplate
                         .withBasicAuth("mary", "password")
                         .postForEntity(
                                 "/api/issues?projectId=1",
-                                issue,
+                                tag,
                                 EntityModel.class
                         );
         System.out.println(response);
         Assertions.assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
     }
 
-    @Test
-    void shouldReturn403ForbiddenTryingUpdateIssueByUnauthorizedUser() {
-        Issue issue = createIssue();
-        var response = restTemplate
-                .withBasicAuth("mary","password")
-                .exchange("/api/issues/1",
-                        HttpMethod.PUT,
-                        new HttpEntity<>(issue),
-                        EntityModel.class);
-        Assertions.assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
-    }
-
-    @Test
-    void shouldUpdateIssueSuccessfully() {
-        Issue issue = createIssue();
-        var response = restTemplate
-                .withBasicAuth("john", "password")
-                .exchange("/api/issues/1",
-                        HttpMethod.PUT,
-                        new HttpEntity<>(issue),
-                        EntityModel.class);
-        System.out.println(response.getBody().getContent().toString());
-        Assertions.assertEquals(HttpStatus.CREATED, response.getStatusCode());
-        Assertions.assertTrue(response.getBody().getContent().toString().contains("id=1, name=Test issue"));
-    }
 
     @Test
     void shouldReturn403ForbiddenTryingDeleteIssueByUnauthorizedUser() {
         var response = restTemplate
                 .withBasicAuth("mary","password")
-                .exchange("/api/issues/1",
+                .exchange("/api/issues/1/tags/1",
                         HttpMethod.DELETE,
                         new HttpEntity<>(HttpEntity.EMPTY),
                         EntityModel.class);
@@ -164,7 +132,7 @@ public class IssueControllerTest extends AbstractControllerTest {
     void shouldDeleteIssueSuccessfully() {
         var response = restTemplate
                 .withBasicAuth("john","password")
-                .exchange("/api/issues/1",
+                .exchange("/api/issues/1/tags/1",
                         HttpMethod.DELETE,
                         new HttpEntity<>(HttpEntity.EMPTY),
                         EntityModel.class);

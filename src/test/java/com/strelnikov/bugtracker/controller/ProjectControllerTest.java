@@ -112,7 +112,7 @@ public class ProjectControllerTest extends AbstractControllerTest {
                         );
         System.out.println(issueResponse);
         Assertions.assertEquals(HttpStatus.CREATED, issueResponse.getStatusCode());
-        Assertions.assertTrue(issueResponse.getBody().contains("\"id\":7,\"name\":\"Test issue\""));
+        Assertions.assertTrue(issueResponse.getBody().contains("\"id\":8,\"name\":\"Test issue\""));
     }
 
     @Test
